@@ -23,7 +23,7 @@ void setup() {
   sCmd.addCommand("P",     processCommand);  // konwersja z char na int i zwraca, tak samo jak HELLO, tylko "przetwarza"
   sCmd.setDefaultHandler(unrecognized);      // co jesli nie ma takiej komendy]
   
-  sCmd.addCommand("setFreq", setFrequency);
+  sCmd.addCommand("SETFREQ", setFrequency);
   
   
   Serial.println("Ready");
