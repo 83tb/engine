@@ -17,10 +17,6 @@ void setup() {
   Serial.begin(9600);
 
   // Setup callbacks for SerialCommand commands
-  sCmd.addCommand("ON",    LED_on);          // Wlacz
-  sCmd.addCommand("OFF",   LED_off);         // Wylacz
-  sCmd.addCommand("HELLO", sayHello);        // Echo
-  sCmd.addCommand("P",     processCommand);  // konwersja z char na int i zwraca, tak samo jak HELLO, tylko "przetwarza"
   sCmd.setDefaultHandler(unrecognized);      // co jesli nie ma takiej komendy]
   
   sCmd.addCommand("spf", setPwmAndFreq);
@@ -33,55 +29,6 @@ void loop() {
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
 
-
-void LED_on() {
-  Serial.println("LED on");
-  digitalWrite(arduinoLED, HIGH);
-}
-
-void LED_off() {
-  Serial.println("LED off");
-  digitalWrite(arduinoLED, LOW);
-}
-
-void sayHello() {
-  char *arg;
-  arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
-  if (arg != NULL) {    
-    Serial.print("Hello ");
-    Serial.println(arg);
-  }
-  else {
-    Serial.println("Hello, whoever you are");
-  }
-}
-
-
-void processCommand() {
-  int aNumber;
-  char *arg;
-
-  Serial.println("We're in processCommand");
-  arg = sCmd.next();
-  if (arg != NULL) {
-    aNumber = atoi(arg);    // Konwertuje char na int
-    Serial.print("First argument was: ");
-    Serial.println(aNumber);
-  }
-  else {
-    Serial.println("No arguments");
-  }
-
-  arg = sCmd.next();
-  if (arg != NULL) {
-    aNumber = atol(arg);
-    Serial.print("Second argument was: ");
-    Serial.println(aNumber);
-  }
-  else {
-    Serial.println("No second argument");
-  }
-}
 
 
 
