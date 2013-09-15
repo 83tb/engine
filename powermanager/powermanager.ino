@@ -150,7 +150,7 @@ void setDigitalLevel() {
       break;
       
       
-      
+     } 
   
     
     setPwmFrequency(freqPIN, DIVISOR);
@@ -160,7 +160,7 @@ void setDigitalLevel() {
     
     
     
-  }
+  
   
   }
   else {
