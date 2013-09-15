@@ -26,9 +26,6 @@ void setup() {
   sCmd.addCommand("spf", setPwmAndFreq);
   sCmd.addCommand("sdl", setDigitalLevel);
    
-  
-  
-  
   Serial.println("Engine console initialized. Ready when you are.");
 }
 
@@ -157,7 +154,9 @@ void setDigitalLevel() {
   
     
     setPwmFrequency(freqPIN, DIVISOR);
+    Serial.println("Divisor has been set");
     analogWrite(freqPIN, aNumber);
+    Serial.println("Level has been set");
     
     
     
@@ -239,5 +238,4 @@ void setPwmFrequency(int pin, int divisor) {
     TCCR2B = TCCR2B & 0b11111000 | mode;
   }
 }
-
 
