@@ -23,10 +23,13 @@ void setup() {
   sCmd.addCommand("P",     processCommand);  // konwersja z char na int i zwraca, tak samo jak HELLO, tylko "przetwarza"
   sCmd.setDefaultHandler(unrecognized);      // co jesli nie ma takiej komendy]
   
-  sCmd.addCommand("SETFREQ", setFrequency);
+  sCmd.addCommand("setFreq", setPwmAndFreq);
+  sCmd.addCommand("sdl", setDigitalLevel);
+   
   
   
-  Serial.println("Ready");
+  
+  Serial.println("Engine console initialized. Ready when you are.");
 }
 
 void loop() {
@@ -85,7 +88,7 @@ void processCommand() {
 
 
 
-void setFrequency() {
+void setPwmAndFreq() {
   int aNumber;
   char *arg;
 
@@ -113,6 +116,56 @@ void setFrequency() {
   }
   else {
     Serial.println("No second argument");
+  }
+}
+
+
+
+void setDigitalLevel() {
+  char *arg;
+  arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
+  if (arg != NULL) {    
+    Serial.print("Hello ");
+    Serial.println(arg);
+    int aNumber = atoi(arg);
+    int DIVISOR;
+    // 0- 7 Divisor 256
+    // 8-63 Divisor 64
+    // 64 - 192, Divisor 8
+    // 193 - 248 Divisor 64
+    // 249 - 255 Divisor 256
+    
+    switch (aNumber) {
+      case 0 ... 7:    // your hand is on the sensor
+      DIVISOR = 256;
+      break;
+      case 8 ... 63:    // your hand is close to the sensor
+      DIVISOR = 64;
+      break;
+    case 64 ... 192:    // your hand is a few inches from the sensor
+      DIVISOR = 8;
+      break;
+    case 193 ... 248:    // your hand is nowhere near the sensor
+      DIVISOR = 64;
+      break;
+    case 249 ... 255:    // your hand is nowhere near the sensor
+      DIVISOR = 256;
+      break;
+      
+      
+      
+  
+    
+    setPwmFrequency(freqPIN, DIVISOR);
+    analogWrite(freqPIN, aNumber);
+    
+    
+    
+  }
+  
+  }
+  else {
+    Serial.println("Please, add an argument 0-255");
   }
 }
 
