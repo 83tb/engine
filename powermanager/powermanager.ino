@@ -1,10 +1,25 @@
 // Kuba Kucharski
 // 2013
 
+/*
+
+Enable Pin - 13
+Freq - 5
+Boost - 6
+Reset - 7
+
+
+*/
+
+
 #include <SerialCommand.h>
 
 #define arduinoLED 13   // Dioda podpięta do pinu 13
-#define freqPIN 6
+#define freqPIN 10
+#define analogPwmPin 9
+#define rcPin 0
+#define rcaPin 1
+
 
 SerialCommand sCmd;     // obiekt komunikacji Serial
 
@@ -21,6 +36,11 @@ void setup() {
   
   sCmd.addCommand("spf", setPwmAndFreq);
   sCmd.addCommand("sdl", setDigitalLevel);
+
+  sCmd.addCommand("sa", setAnalogPwm);
+  sCmd.addCommand("rc", readCurrent);
+  sCmd.addCommand("rca", readCurrentAvg);
+  
    
   Serial.println("Engine console initialized. Ready when you are.");
 }
@@ -116,12 +136,72 @@ void setDigitalLevel() {
 }
 
 
+
+
+
+
+void setAnalogPwm() {
+  char *arg;
+  arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
+  if (arg != NULL) {    
+    Serial.print("Hello ");
+    Serial.println(arg);
+    int aNumber = atoi(arg);
+   
+  
+    
+    analogWrite(analogPwmPin, aNumber);
+    Serial.println("Level has been set");
+    
+    
+    
+  
+  
+  }
+  else {
+    Serial.println("Please, add an argument 0-255");
+  }
+}
+
+
+
+
+
+
+
+void readCurrent() {
+  float val;
+  val = analogRead(rcPin);    // read the input pin
+  
+  float A = val*2;
+  
+  
+  Serial.print(val);  
+  Serial.println(" units");
+  
+  
+}
+
+
+
 // nie rozpoznano komendy
 void unrecognized(const char *command) {
   Serial.println("What?");
 }
 
 
+
+
+
+
+void readCurrentAvg() {
+  float val;
+  val = analogRead(rcaPin);    // read the input pin
+  Serial.print(val);  
+  Serial.println(" units");
+  
+  
+}
 
 /**
  * Divides a given PWM pin frequency by a divisor.
