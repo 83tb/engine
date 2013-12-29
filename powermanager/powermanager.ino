@@ -8,10 +8,13 @@ Freq - 5
 Boost - 6
 Reset - 7
 
+Log: 
+
+
 
 */
 
-
+#include <Wire.h>
 #include <SerialCommand.h>
 
 #define arduinoLED 13   // Dioda podpięta do pinu 13
@@ -20,13 +23,69 @@ Reset - 7
 #define rcPin 0
 #define rcaPin 1
 
+#define ENABLE 13
+#define FREQ 5
+#define BOOST 6
+#define RESET 7
 
 SerialCommand sCmd;     // obiekt komunikacji Serial
 
+
+
+void pulse(int high) {
+ 
+  
+  for (int steps = 20; steps < high; steps++) { 
+    // turn the pin on:
+  analogWrite(freqPIN, steps);
+  analogWrite(analogPwmPin, steps);
+  delay(10);
+ 
+  }
+  
+  for (int steps = high; steps > 20; steps--) { 
+    // turn the pin on:
+  analogWrite(freqPIN, steps);
+  analogWrite(analogPwmPin, steps);
+  delay(10);
+ 
+  }
+  
+  
+ 
+  
+  
+}
+
+
+
+
 void setup() {
-  pinMode(arduinoLED, OUTPUT);      // Ustawiam PIN jako wyjscie analogowe
-  digitalWrite(arduinoLED, LOW);    // Dioda wylaczona
-  pinMode(freqPIN, OUTPUT);  
+       // Ustawiam PIN jako wyjscie analogowe
+     // Dioda wylaczona
+  pinMode(freqPIN, OUTPUT); 
+ 
+ 
+  // zmien to gdy przeniesiesz sie za szmita
+   
+  pinMode(ENABLE, OUTPUT);  
+  pinMode(FREQ, OUTPUT);  
+  pinMode(BOOST, OUTPUT);  
+  pinMode(RESET, OUTPUT);  
+  digitalWrite(ENABLE, HIGH); 
+  digitalWrite(BOOST, HIGH); 
+  
+  
+ 
+  digitalWrite(RESET, HIGH); 
+  
+  pulse(40);
+  pulse(40);
+  pulse(40);
+ 
+  
+  Wire.begin();
+  
   
 
   Serial.begin(9600);
@@ -41,12 +100,87 @@ void setup() {
   sCmd.addCommand("rc", readCurrent);
   sCmd.addCommand("rca", readCurrentAvg);
   
+  sCmd.addCommand("enbl", enable);
+  sCmd.addCommand("dsbl", disable);
+  
+  sCmd.addCommand("bst", boost);
+  sCmd.addCommand("unbst", unboost);
+   sCmd.addCommand("rst", resetBoard);
    
-  Serial.println("Engine console initialized. Ready when you are.");
+  sCmd.addCommand("ffu", flipFreqUp);
+  sCmd.addCommand("ffd", flipFreqDown);
+  
+   
+  sCmd.addCommand("rw", readWire);
+  sCmd.addCommand("ww", writeWire);
+  
+  sCmd.addCommand("h", help);
+  
+  Serial.println("-------------------\n"); 
+  Serial.println("POWERMANAGER, @83TB\n"); 
+  Serial.println("Log: Engine console initialized. Ready when you are.");
+  Serial.println("Hint: Type h for help");
+  
+}
+
+
+void help(){
+ 
+ Serial.println("");
+ 
+ Serial.println("sdl: sets digital level (automatic freq)");
+ Serial.println("spf: sets pwm and frequency");
+ Serial.println("sa: sets analog PWM");
+ Serial.println("bst: boost ON");
+ Serial.println("ubst: boost OFF");
+ Serial.println("enbl: turn ON");
+ Serial.println("dsbl: turn OFF");
+ Serial.println("rst: resets LED control board");
+ Serial.println("ffu: FREQ ON");
+ Serial.println("ffd: FREQ OFF");
+  
+ Serial.println("h: prints help");
+ Serial.println("rc: reads current");
+ Serial.println("rca: reads average current");
+ 
+ Serial.println("\n");
+ 
+
+ 
+ 
+ 
+ 
+ 
+  
 }
 
 void loop() {
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
+}
+
+
+
+void writeWire() {
+ 
+  Wire.beginTransmission(47); // transmit to device #44 (0x2f)
+                              // device address is specified in datasheet
+  Wire.write(byte(0x00));            // sends instruction byte  
+  Wire.write(40);             // sends potentiometer value byte  
+  Wire.endTransmission();     // stop transmitting
+
+}
+
+
+void readWire() {
+ 
+   Wire.requestFrom(47, 1);    // request 6 bytes from slave device #2
+
+   while(Wire.available())    // slave may send less than requested
+  { 
+    char c = Wire.read(); // receive a byte as character
+    Serial.print(c);         // print the character
+  }
+  delay(500);
 }
 
 
@@ -56,12 +190,12 @@ void setPwmAndFreq() {
   int aNumber;
   char *arg;
 
-  Serial.println("We're in setFrequency");
+  // Serial.println("We're in setFrequency");
   arg = sCmd.next();
   if (arg != NULL) {
     aNumber = atoi(arg);    // Konwertuje char na int
-    Serial.print("First argument was: ");
-    Serial.println(aNumber);
+  //  Serial.print("First argument was: ");
+    
     setPwmFrequency(freqPIN, aNumber);
     
   }
@@ -72,8 +206,8 @@ void setPwmAndFreq() {
   arg = sCmd.next();
   if (arg != NULL) {
     aNumber = atol(arg);
-    Serial.print("Second argument was: ");
-    Serial.println(aNumber);
+   // Serial.print("Second argument was: ");
+   
     analogWrite(freqPIN, aNumber);
     
     
@@ -89,8 +223,8 @@ void setDigitalLevel() {
   char *arg;
   arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
   if (arg != NULL) {    
-    Serial.print("Hello ");
-    Serial.println(arg);
+    
+   
     int aNumber = atoi(arg);
     int DIVISOR;
     // 0- 7 Divisor 256
@@ -121,9 +255,9 @@ void setDigitalLevel() {
   
     
     setPwmFrequency(freqPIN, DIVISOR);
-    Serial.println("Divisor has been set");
+
     analogWrite(freqPIN, aNumber);
-    Serial.println("Level has been set");
+
     
     
     
@@ -144,14 +278,14 @@ void setAnalogPwm() {
   char *arg;
   arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
   if (arg != NULL) {    
-    Serial.print("Hello ");
-    Serial.println(arg);
+
+ 
     int aNumber = atoi(arg);
    
   
     
     analogWrite(analogPwmPin, aNumber);
-    Serial.println("Level has been set");
+    Serial.println("Log: Analog PWM has been set");
     
     
     
@@ -175,9 +309,11 @@ void readCurrent() {
   
   float A = val*2;
   
+  Serial.print("Info: {'current':'");
+  
   
   Serial.print(val);  
-  Serial.println(" units");
+  Serial.println("'}");
   
   
 }
@@ -186,19 +322,71 @@ void readCurrent() {
 
 // nie rozpoznano komendy
 void unrecognized(const char *command) {
-  Serial.println("What?");
+  Serial.println("What? I don't know this command. ");
 }
 
 
 
 
+void enable() {
+  Serial.println("Log: Lamp On");
+  digitalWrite(ENABLE, HIGH);
+}
+
+void disable() {
+  Serial.println("Log: Lamp Off");
+   digitalWrite(ENABLE, LOW);
+}
+
+
+
+void boost() {
+  Serial.println("Log: Boost On");
+  digitalWrite(BOOST, LOW);
+  
+}
+
+void unboost() {
+  Serial.println("Log: Boost Off");
+   digitalWrite(BOOST, HIGH);
+   resetBoard();
+}
+
+
+void flipFreqUp() {
+  Serial.println("Log: FREQ UP");
+  digitalWrite(FREQ, HIGH);
+}
+
+void flipFreqDown() {
+  Serial.println("Log: FREQ DOWN");
+  digitalWrite(FREQ, LOW);
+}
+
+
+
+void resetBoard() {
+  Serial.println("Log: Board resetted");
+  
+
+ 
+   
+   digitalWrite(RESET, LOW);
+   delay(100);
+   digitalWrite(RESET, HIGH);
+ 
+}
 
 
 void readCurrentAvg() {
   float val;
   val = analogRead(rcaPin);    // read the input pin
+  
+   Serial.print("Info: {'avg_current':'");
+  
+  
   Serial.print(val);  
-  Serial.println(" units");
+  Serial.println("'}");
   
   
 }
