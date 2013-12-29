@@ -116,6 +116,8 @@ void setup() {
   
   sCmd.addCommand("h", help);
   
+  sCmd.addCommand("i2c", i2c_scan);
+  
   Serial.println("-------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
   Serial.println("Log: Engine console initialized. Ready when you are.");
@@ -142,6 +144,9 @@ void help(){
  Serial.println("h: prints help");
  Serial.println("rc: reads current");
  Serial.println("rca: reads average current");
+ Serial.println("i2c: i2c scanner");
+ 
+ 
  
  Serial.println("\n");
  
@@ -154,6 +159,50 @@ void help(){
   
 }
 
+
+
+void i2c_scan() {
+  byte error, address;
+  int nDevices;
+
+  Serial.println("Log: Scanning...");
+
+  nDevices = 0;
+  for(address = 1; address < 127; address++ ) 
+  {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+
+    if (error == 0)
+    {
+      Serial.print("Info: I2C device found at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.print(address,HEX);
+      Serial.println("  !");
+
+      nDevices++;
+    }
+    else if (error==4) 
+    {
+      Serial.print("Info: Unknown error at address 0x");
+      if (address<16) 
+        Serial.print("0");
+      Serial.println(address,HEX);
+    }    
+  }
+  if (nDevices == 0)
+    Serial.println("Info: No I2C devices found\n");
+  else
+    Serial.println("Log: I2C scan completed\n");
+
+ 
+  
+}
+  
 void loop() {
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
