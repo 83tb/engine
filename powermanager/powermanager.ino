@@ -14,21 +14,30 @@ Log:
 
 */
 
+
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+
 #include <Wire.h>
 #include <SerialCommand.h>
 
-#define arduinoLED 13   // Dioda podpięta do pinu 13
-#define freqPIN 10
-#define analogPwmPin 9
-#define rcPin 0
-#define rcaPin 1
+
+#define MAIN_PWM 10
+#define ANALOG_PWM 9
+#define RCPIN 0
+#define RCAPIN 1
 
 #define ENABLE 13
 #define FREQ 5
 #define BOOST 6
 #define RESET 7
 
+#define ONE_WIRE_BUS 2
+
 SerialCommand sCmd;     // obiekt komunikacji Serial
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensors(&oneWire);
 
 
 
@@ -37,16 +46,16 @@ void pulse(int high) {
   
   for (int steps = 20; steps < high; steps++) { 
     // turn the pin on:
-  analogWrite(freqPIN, steps);
-  analogWrite(analogPwmPin, steps);
+  analogWrite(MAIN_PWM, steps);
+  analogWrite(ANALOG_PWM, steps);
   delay(10);
  
   }
   
   for (int steps = high; steps > 20; steps--) { 
     // turn the pin on:
-  analogWrite(freqPIN, steps);
-  analogWrite(analogPwmPin, steps);
+  analogWrite(MAIN_PWM, steps);
+  analogWrite(ANALOG_PWM, steps);
   delay(10);
  
   }
@@ -63,7 +72,7 @@ void pulse(int high) {
 void setup() {
        // Ustawiam PIN jako wyjscie analogowe
      // Dioda wylaczona
-  pinMode(freqPIN, OUTPUT); 
+  pinMode(MAIN_PWM, OUTPUT); 
  
  
   // zmien to gdy przeniesiesz sie za szmita
@@ -117,11 +126,29 @@ void setup() {
   sCmd.addCommand("h", help);
   
   sCmd.addCommand("i2c", i2c_scan);
+  sCmd.addCommand("temp", temperature);
+  
+  
+  sensors.begin();
   
   Serial.println("-------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
   Serial.println("Log: Engine console initialized. Ready when you are.");
   Serial.println("Hint: Type h for help");
+  
+}
+
+
+
+void temperature() {
+ sensors.requestTemperatures();
+ 
+  Serial.print("Info: {'temperature':'");
+  
+  
+  Serial.print(sensors.getTempCByIndex(0));  
+  Serial.println("'}");
+
   
 }
 
@@ -145,6 +172,8 @@ void help(){
  Serial.println("rc: reads current");
  Serial.println("rca: reads average current");
  Serial.println("i2c: i2c scanner");
+ Serial.println("temp: thermal sensor on pin 2 - one wire, dallas");
+ 
  
  
  
@@ -165,7 +194,7 @@ void i2c_scan() {
   byte error, address;
   int nDevices;
 
-  Serial.println("Log: Scanning...");
+  Serial.println("Log: Scanning");
 
   nDevices = 0;
   for(address = 1; address < 127; address++ ) 
@@ -181,8 +210,8 @@ void i2c_scan() {
       Serial.print("Info: I2C device found at address 0x");
       if (address<16) 
         Serial.print("0");
-      Serial.print(address,HEX);
-      Serial.println("  !");
+      Serial.println(address,HEX);
+        
 
       nDevices++;
     }
@@ -245,7 +274,7 @@ void setPwmAndFreq() {
     aNumber = atoi(arg);    // Konwertuje char na int
   //  Serial.print("First argument was: ");
     
-    setPwmFrequency(freqPIN, aNumber);
+    setPwmFrequency(MAIN_PWM, aNumber);
     
   }
   else {
@@ -257,7 +286,7 @@ void setPwmAndFreq() {
     aNumber = atol(arg);
    // Serial.print("Second argument was: ");
    
-    analogWrite(freqPIN, aNumber);
+    analogWrite(MAIN_PWM, aNumber);
     
     
   }
@@ -303,9 +332,9 @@ void setDigitalLevel() {
      } 
   
     
-    setPwmFrequency(freqPIN, DIVISOR);
+    setPwmFrequency(MAIN_PWM, DIVISOR);
 
-    analogWrite(freqPIN, aNumber);
+    analogWrite(MAIN_PWM, aNumber);
 
     
     
@@ -333,7 +362,7 @@ void setAnalogPwm() {
    
   
     
-    analogWrite(analogPwmPin, aNumber);
+    analogWrite(ANALOG_PWM, aNumber);
     Serial.println("Log: Analog PWM has been set");
     
     
@@ -354,7 +383,7 @@ void setAnalogPwm() {
 
 void readCurrent() {
   float val;
-  val = analogRead(rcPin);    // read the input pin
+  val = analogRead(RCPIN);    // read the input pin
   
   float A = val*2;
   
@@ -429,7 +458,7 @@ void resetBoard() {
 
 void readCurrentAvg() {
   float val;
-  val = analogRead(rcaPin);    // read the input pin
+  val = analogRead(RCAPIN);    // read the input pin
   
    Serial.print("Info: {'avg_current':'");
   
