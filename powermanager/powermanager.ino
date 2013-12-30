@@ -157,22 +157,27 @@ void help(){
  
  Serial.println("");
  
- Serial.println("sdl: sets digital level (automatic freq)");
- Serial.println("spf: sets pwm and frequency");
- Serial.println("sa: sets analog PWM");
- Serial.println("bst: boost ON");
- Serial.println("ubst: boost OFF");
- Serial.println("enbl: turn ON");
- Serial.println("dsbl: turn OFF");
- Serial.println("rst: resets LED control board");
- Serial.println("ffu: FREQ ON");
- Serial.println("ffd: FREQ OFF");
+ Serial.println("Hint: sdl: sets digital level (automatic freq)");
+ Serial.println("Hint: spf: sets pwm and frequency");
+ Serial.println("Hint: sa: sets analog PWM");
+ Serial.println("Hint: bst: boost ON");
+ Serial.println("Hint: ubst: boost OFF");
+ Serial.println("Hint: enbl: turn ON");
+ Serial.println("Hint: dsbl: turn OFF");
+ Serial.println("Hint: rst: resets LED control board");
+ Serial.println("Hint: ffu: FREQ ON");
+ Serial.println("Hint: ffd: FREQ OFF");
   
- Serial.println("h: prints help");
- Serial.println("rc: reads current");
- Serial.println("rca: reads average current");
- Serial.println("i2c: i2c scanner");
- Serial.println("temp: thermal sensor on pin 2 - one wire, dallas");
+ Serial.println("Hint: h: prints help");
+ Serial.println("Hint: rc: reads current");
+ Serial.println("Hint: rca: reads average current");
+ Serial.println("Hint: i2c: i2c scanner");
+ Serial.println("Hint: temp: thermal sensor on pin 2 - one wire, DS18B20");
+ 
+ Serial.println("\nHint: Undocumented");
+ Serial.println("Hint: rw: readWire");
+ Serial.println("Hint: ww: writeWire");
+ 
  
  
  
