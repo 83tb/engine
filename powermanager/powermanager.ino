@@ -23,6 +23,13 @@ Log:
 #include <SerialCommand.h>
 
 
+
+#include "Adafruit_MCP23017.h"
+
+
+Adafruit_MCP23017 mcp;
+
+
 #define MAIN_PWM 10
 #define ANALOG_PWM 9
 #define RCPIN 0
@@ -36,8 +43,8 @@ Log:
 #define ONE_WIRE_BUS 2
 
 SerialCommand sCmd;     // obiekt komunikacji Serial
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
+//OneWire oneWire(ONE_WIRE_BUS);
+//DallasTemperature sensors(&oneWire);
 
 
 
@@ -95,6 +102,13 @@ void setup() {
   
   Wire.begin();
   
+ setup_input(0x20);
+ setup_output(0x21);
+ 
+  
+ //setup_output(0x68);
+  
+  
   
 
   Serial.begin(9600);
@@ -116,20 +130,28 @@ void setup() {
   sCmd.addCommand("unbst", unboost);
    sCmd.addCommand("rst", resetBoard);
    
-  sCmd.addCommand("ffu", flipFreqUp);
-  sCmd.addCommand("ffd", flipFreqDown);
+  //sCmd.addCommand("ffu", flipFreqUp);
+  //sCmd.addCommand("ffd", flipFreqDown);
   
    
-  sCmd.addCommand("rw", readWire);
+  sCmd.addCommand("#", comment);
   sCmd.addCommand("ww", writeWire);
+  
+  sCmd.addCommand("mt", match);
+  
   
   sCmd.addCommand("h", help);
   
   sCmd.addCommand("i2c", i2c_scan);
-  sCmd.addCommand("temp", temperature);
+  //sCmd.addCommand("talk", talk);
+ 
+  sCmd.addCommand("sir", sir);
+  sCmd.addCommand("sio", sio);
+  
+  //sCmd.addCommand("temp", temperature);
   
   
-  sensors.begin();
+  //sensors.begin();
   
   Serial.println("-------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
@@ -139,7 +161,7 @@ void setup() {
 }
 
 
-
+/*
 void temperature() {
  sensors.requestTemperatures();
  
@@ -151,7 +173,7 @@ void temperature() {
 
   
 }
-
+*/
 
 void help(){
  
@@ -165,18 +187,23 @@ void help(){
  Serial.println("Hint: enbl: turn ON");
  Serial.println("Hint: dsbl: turn OFF");
  Serial.println("Hint: rst: resets LED control board");
- Serial.println("Hint: ffu: FREQ ON");
- Serial.println("Hint: ffd: FREQ OFF");
+ //Serial.println("Hint: ffu: FREQ ON");
+ //Serial.println("Hint: ffd: FREQ OFF");
   
  Serial.println("Hint: h: prints help");
  Serial.println("Hint: rc: reads current");
  Serial.println("Hint: rca: reads average current");
  Serial.println("Hint: i2c: i2c scanner");
  Serial.println("Hint: temp: thermal sensor on pin 2 - one wire, DS18B20");
+ Serial.println("Hint: talk: talks to i2c");
+ Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
+ 
+ 
  
  Serial.println("\nHint: Undocumented");
  Serial.println("Hint: rw: readWire");
  Serial.println("Hint: ww: writeWire");
+ 
  
  
  
@@ -245,7 +272,7 @@ void loop() {
 
 void writeWire() {
  
-  Wire.beginTransmission(47); // transmit to device #44 (0x2f)
+  Wire.beginTransmission(39); // transmit to device #44 (0x2f)
                               // device address is specified in datasheet
   Wire.write(byte(0x00));            // sends instruction byte  
   Wire.write(40);             // sends potentiometer value byte  
@@ -256,7 +283,7 @@ void writeWire() {
 
 void readWire() {
  
-   Wire.requestFrom(47, 1);    // request 6 bytes from slave device #2
+   Wire.requestFrom(39, 1);    // request 6 bytes from slave device #2
 
    while(Wire.available())    // slave may send less than requested
   { 
@@ -403,6 +430,13 @@ void readCurrent() {
 
 
 
+
+void comment() {
+ 
+  
+}
+
+
 // nie rozpoznano komendy
 void unrecognized(const char *command) {
   Serial.println("What? I don't know this command. ");
@@ -536,4 +570,293 @@ void setPwmFrequency(int pin, int divisor) {
     TCCR2B = TCCR2B & 0b11111000 | mode;
   }
 }
+
+
+
+#define MCP23017_ADDRESS 0x20
+
+// registers
+#define MCP23017_IODIRA 0x00
+#define MCP23017_IPOLA 0x02
+#define MCP23017_GPINTENA 0x04 // 1 to interrupts
+#define MCP23017_DEFVALA 0x06  // 1 to interrupts
+#define MCP23017_INTCONA 0x08 // 1 to interrupts, if it's set to 0 it's compared to value, if 0 it's for default value
+#define MCP23017_IOCONA 0x0A
+#define MCP23017_GPPUA 0x0C // tez na 1
+#define MCP23017_INTFA 0x0E
+#define MCP23017_INTCAPA 0x10
+#define MCP23017_GPIOA 0x12
+#define MCP23017_OLATA 0x14 
+
+
+#define MCP23017_IODIRB 0x01
+#define MCP23017_IPOLB 0x03
+#define MCP23017_GPINTENB 0x05
+#define MCP23017_DEFVALB 0x07
+#define MCP23017_INTCONB 0x09
+#define MCP23017_IOCONB 0x0B
+#define MCP23017_GPPUB 0x0D
+#define MCP23017_INTFB 0x0F
+#define MCP23017_INTCAPB 0x11
+#define MCP23017_GPIOB 0x13
+#define MCP23017_OLATB 0x15
+
+
+void talk() {
+  // The LED will 'echo' the button
+  
+  mcp.begin(0x27);      // use default address 0
+  mcp.pinMode(3, INPUT);
+  mcp.pullUp(3, HIGH);  // turn on a 100K pullup internally
+  Serial.println(digitalRead(3));
+  
+}
+
+
+
+
+void sir() {
+  
+  
+  int address;
+  int registry;
+  int packet;
+  char *arg;
+
+  // Serial.println("We're in setFrequency");
+  arg = sCmd.next();
+  if (arg != NULL) {
+   
+  //  Serial.print("First argument was: ");
+    address = strtol(arg, NULL, 16);
+     // transmit to device #44 (0x2f)
+    
+  }
+  else {
+    Serial.println("No arguments");
+  }
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+     registry = strtol(arg, NULL, 16);
+   // Serial.print("Second argument was: ");
+   
+   
+    
+    
+  }
+  else {
+    Serial.println("No second argument");
+  }
+  
+  
+  arg = sCmd.next();
+  if (arg != NULL) {
+    packet = strtol(arg, NULL, 16);
+   // Serial.print("Second argument was: ");
+   
+   
+    
+    
+  }
+  else {
+    Serial.println("No third argument");
+  }
+  
+  
+  
+  
+   Wire.beginTransmission(address);
+   Serial.print("Adres urzadzenia: ");
+   Serial.println(address);
+   Serial.print("Adres rejestru: ");
+   Serial.println(registry);
+   
+   Wire.write(registry); 
+   
+   Serial.print("Wysylamy pakiet: ");
+   Serial.println(packet);
+   Wire.write(packet);    
+   
+   Serial.println("Odczytano: ");
+   Wire.endTransmission(); 
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())    // slave may send less than requested
+  { 
+    char c = Wire.read(); // receive a byte as character
+    Serial.println(c, BIN);
+      Serial.println(c);
+
+    // print the character
+  }
+  delay(500);
+     
+  
+}
+
+
+
+
+
+void sio() {
+  
+  
+  int address;
+  int registry;
+  int packet;
+  char *arg;
+
+  // Serial.println("We're in setFrequency");
+  arg = sCmd.next();
+  if (arg != NULL) {
+   
+  //  Serial.print("First argument was: ");
+    address = strtol(arg, NULL, 16);
+     // transmit to device #44 (0x2f)
+    
+  }
+  else {
+    Serial.println("No arguments");
+  }
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+     registry = strtol(arg, NULL, 16);
+   // Serial.print("Second argument was: ");
+   
+   
+    
+    
+  }
+  else {
+    Serial.println("No second argument");
+  }
+  
+  /*
+  arg = sCmd.next();
+  if (arg != NULL) {
+    long packet = strtol(arg, NULL, 16);
+   // Serial.print("Second argument was: ");
+   
+   
+    
+    
+  }
+  else {
+    Serial.println("No third argument");
+  }
+  
+  */
+  
+  
+   Wire.beginTransmission(address);
+   Serial.print("Adres urzadzenia: ");
+   Serial.println(address);
+   Serial.print("Adres rejestru: ");
+   Serial.println(registry);
+   
+   Wire.write(registry); 
+   //Wire.write(packet);    
+   
+   Serial.println("Odczytano: ");
+   Wire.endTransmission();  
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())    // slave may send less than requested
+  { 
+    char c = Wire.read(); // receive a byte as character
+    Serial.println(c, BIN);
+      Serial.println(c);
+  }
+  delay(500);
+  
+  
+}
+  
+  
+  
+
+void setup_output(char ad)
+{
+
+ 
+ // setup device
+ 
+ Wire.begin(); // wake up I2C bus
+// set I/O pins to outputs
+ Wire.beginTransmission(ad);
+ Wire.write(0x00); // IODIRA register
+ Wire.write(0x00); // set all of port A to outputs
+ Wire.endTransmission();
+ Wire.beginTransmission(0xad);
+ Wire.write(0x01); // IODIRB register
+ Wire.write(0x00); // set all of port B to outputs
+ Wire.endTransmission();
+
+}
+
+
+
+void setup_input(char ad)
+{
+
+ 
+ // setup device
+ 
+ Wire.begin(); // wake up I2C bus
+// set I/O pins to outputs
+ Wire.beginTransmission(ad);
+ Wire.write(0x04); 
+ Wire.write(0xFF); 
+ Wire.endTransmission();
+ 
+ Wire.beginTransmission(ad);
+ Wire.write(0x06); 
+ Wire.write(0xFF); 
+ Wire.endTransmission();
+ 
+ Wire.beginTransmission(ad);
+ Wire.write(0x08);
+ Wire.write(0xFF); 
+ Wire.endTransmission();
+ 
+ Wire.beginTransmission(ad);
+ Wire.write(0x0C); 
+ Wire.write(0xFF); 
+ Wire.endTransmission();
+ 
+
+
+
+}
+
+
+
+void match()
+{
+ 
+ Wire.requestFrom(0x20, 12); 
+ char c;  
+ while(Wire.available())    // slave may send less than requested
+    { 
+    c = Wire.read(); // receive a byte as character
+    Serial.println(c, BIN);
+      Serial.println(c);
+  }
+ Wire.beginTransmission(0x21);
+ Wire.write(0x12); // GPIOA
+ 
+ Wire.write(c); // port A
+ Wire.endTransmission();
+ Wire.beginTransmission(0x21);
+ Wire.write(0x13); // GPIOB
+ Wire.write(c); // port B
+ Wire.endTransmission();
+ delay(100);
+ 
+}
+
+
+
 
