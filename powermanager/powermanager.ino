@@ -167,24 +167,26 @@ void sir(int address,int registry,int packet) {
  
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: ");
-   Serial.println(address);
-   Serial.print("Adres rejestru: ");
-   Serial.println(registry);
+   Serial.print(address, HEX);
+   Serial.print("    Adres rejestru: ");
+   Serial.println(registry, HEX);
    
    Wire.write(registry); 
    
    Serial.print("Wysylamy pakiet: ");
-   Serial.println(packet);
+   Serial.println(packet, HEX);
    Wire.write(packet);    
    
-   Serial.println("Odczytano: ");
+   Serial.print("Odczytano:   ");
    Wire.endTransmission(); 
    Wire.requestFrom(address, 1); 
    
    while(Wire.available())    // slave may send less than requested
   { 
     char c = Wire.read(); // receive a byte as character
-    Serial.println(c, BIN);
+    Serial.print(c, BIN);
+	Serial.print(" | ");
+    Serial.println(c, HEX);
 
   }
   delay(500);
@@ -199,21 +201,24 @@ void sio(int address,int registry) {
   
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: ");
-   Serial.println(address);
-   Serial.print("Adres rejestru: ");
-   Serial.println(registry);
+   Serial.print(address, HEX);
+   Serial.print("   Adres rejestru: ");
+   Serial.println(registry, HEX);
    
    Wire.write(registry); 
   
    
-   Serial.println("Odczytano: ");
+   Serial.print("Odczytano:     ");
    Wire.endTransmission();  
    Wire.requestFrom(address, 1); 
    
    while(Wire.available())  
   { 
     char c = Wire.read(); 
-    Serial.println(c, BIN);
+    Serial.print(c, BIN);
+	Serial.print(" | ");
+    Serial.println(c, HEX);
+	
      
   }
   delay(500);
