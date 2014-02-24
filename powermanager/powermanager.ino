@@ -65,13 +65,17 @@ void setup() {
   digitalWrite(RESET, HIGH); 
   
   
-  pulse(40);
-  pulse(40);
-  pulse(40);
+
  
   
   setup_input(0x20);
   setup_output(0x21);
+  setPullUp(0x20);
+  setInputOnChange(0x20);
+  setDefaultValue(0x20);
+  setSeqopDisabled(0x20);
+  
+  
  
   Serial.begin(9600);
 
@@ -100,9 +104,10 @@ void setup() {
   
    
   sCmd.addCommand("#", comment);
+  sCmd.addCommand("rb", readButton);
 
   
-  sCmd.addCommand("mt", match);
+
   
   
   sCmd.addCommand("h", help);
@@ -110,8 +115,8 @@ void setup() {
   sCmd.addCommand("i2c", i2c_scan);
 
  
-  sCmd.addCommand("sir", sir);
-  sCmd.addCommand("sio", sio);
+  sCmd.addCommand("sir", sir_func);
+  sCmd.addCommand("sio", sio_func);
   
   //sCmd.addCommand("temp", temperature);
   
@@ -469,7 +474,7 @@ void temperature() {
 
 
 
-void sir() {
+void sir_func() {
   
   
   int address;
@@ -540,7 +545,7 @@ void sir() {
   { 
     char c = Wire.read(); // receive a byte as character
     Serial.println(c, BIN);
-      Serial.println(c);
+     
 
     // print the character
   }
@@ -552,8 +557,84 @@ void sir() {
 
 
 
+void sir(int address,int registry,int packet) {
+  
+  
 
-void sio() {
+
+
+	  /*
+  address = strtol(address_, NULL, 16);
+  registry = strtol(registry_, NULL, 16);
+  packet = strtol(packet_, NULL, 16);
+  */
+ 
+  Wire.beginTransmission(address);
+   Serial.print("Adres urzadzenia: ");
+   Serial.println(address);
+   Serial.print("Adres rejestru: ");
+   Serial.println(registry);
+   
+   Wire.write(registry); 
+   
+   Serial.print("Wysylamy pakiet: ");
+   Serial.println(packet);
+   Wire.write(packet);    
+   
+   Serial.println("Odczytano: ");
+   Wire.endTransmission(); 
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())    // slave may send less than requested
+  { 
+    char c = Wire.read(); // receive a byte as character
+    Serial.println(c, BIN);
+     
+
+    // print the character
+  }
+  delay(500);
+     
+  
+}
+
+
+
+void sio(int address,int registry) {
+
+
+	  /*
+   address = strtol(address_, NULL, 16);
+
+   registry = strtol(registry_, NULL, 16);
+ */
+  
+   Wire.beginTransmission(address);
+   Serial.print("Adres urzadzenia: ");
+   Serial.println(address);
+   Serial.print("Adres rejestru: ");
+   Serial.println(registry);
+   
+   Wire.write(registry); 
+  
+   
+   Serial.println("Odczytano: ");
+   Wire.endTransmission();  
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())    // slave may send less than requested
+  { 
+    char c = Wire.read(); // receive a byte as character
+    Serial.println(c, BIN);
+     
+  }
+  delay(500);
+  
+  
+}
+  
+
+void sio_func() {
   
   
   int address;
@@ -621,7 +702,7 @@ void sio() {
   { 
     char c = Wire.read(); // receive a byte as character
     Serial.println(c, BIN);
-      Serial.println(c);
+     
   }
   delay(500);
   
@@ -634,19 +715,9 @@ void sio() {
 void setup_output(char ad)
 {
 
- 
- // setup device
- 
- Wire.begin(); // wake up I2C bus
-// set I/O pins to outputs
- Wire.beginTransmission(ad);
- Wire.write(0x00); // IODIRA register
- Wire.write(0x00); // set all of port A to outputs
- Wire.endTransmission();
- Wire.beginTransmission(0xad);
- Wire.write(0x01); // IODIRB register
- Wire.write(0x00); // set all of port B to outputs
- Wire.endTransmission();
+sir(ad,0x00,0x00);
+sir(ad,0x01,0x00);
+
 
 }
 
@@ -655,31 +726,10 @@ void setup_output(char ad)
 void setup_input(char ad)
 {
 
- 
- // setup device
- 
- Wire.begin(); // wake up I2C bus
-// set I/O pins to outputs
- Wire.beginTransmission(ad);
- Wire.write(0x04); 
- Wire.write(0xFF); 
- Wire.endTransmission();
- 
- Wire.beginTransmission(ad);
- Wire.write(0x06); 
- Wire.write(0xFF); 
- Wire.endTransmission();
- 
- Wire.beginTransmission(ad);
- Wire.write(0x08);
- Wire.write(0xFF); 
- Wire.endTransmission();
- 
- Wire.beginTransmission(ad);
- Wire.write(0x0C); 
- Wire.write(0xFF); 
- Wire.endTransmission();
- 
+sir(ad,0x00,0xff);
+sir(ad,0x01,0xff);
+sir(ad,0x02,0xff);
+sir(ad,0x03,0xff);
 
 
 
@@ -687,62 +737,62 @@ void setup_input(char ad)
 
 
 
-void match()
+
+
+
+void setPullUp(int ad)
 {
- 
- Wire.requestFrom(0x20, 12); 
- char c;  
- while(Wire.available())    // slave may send less than requested
-    { 
-    c = Wire.read(); // receive a byte as character
-    Serial.println(c, BIN);
-      Serial.println(c);
-  }
- Wire.beginTransmission(0x21);
- Wire.write(0x12); // GPIOA
- 
- Wire.write(c); // port A
- Wire.endTransmission();
- Wire.beginTransmission(0x21);
- Wire.write(0x13); // GPIOB
- Wire.write(c); // port B
- Wire.endTransmission();
- delay(100);
- 
+	sir(ad,0x0c,0xff);
+	sir(ad,0x0d,0xff);
+	
 }
 
 
-// no need
-// input polarity not inverted
-// sir 0x20 0x02 0x00 A 
-// sir 0x20 0x03 0x00 B
-// sir 0x21 0x02 0x00 A 
-// sir 0x21 0x02 0x00 B
-
-// pull ups
-// sir 0x20 0x0c 0xff  // set x20 A  set pull-up resistors on 
-// sir 0x20 0x0d 0xff  // set x20 B  set pull-up resistors on
+void setInputOnChange(int ad)
+{
+	sir(ad,0x04,0xff);
+	sir(ad,0x05,0xff);
+	
+}
 
 
-// sir 0x20 0x04 0xff  // set x20 A  input on change enable
-// sir 0x20 0x05 0xff  // set x20 B  input on change enable
-// sir 0x20 0x06 0xff  // set x20 A  set default value (DEFVALn)
-// sir 0x20 0x07 0xff  // set x20 B  set default value (DEFVALn)
+void setDefaultValue(int ad)
+{
+	sir(ad,0x06,0xff);
+	sir(ad,0x07,0xff);
+
+	sir(ad,0x08,0xff); // set interupt when value against DEFVAL (INTCONn):
+	
+}
+
+void setSeqopDisabled(int ad)
+{
+	sir(ad,0x0a,0x20);
+	
+}
+
+
+void readButton()
+{
+	sio(0x20,0x10);
+	sio(0x20,0x11);
+	sio(0x20,0x12);
+	sio(0x20,0x13);
+	sio(0x20,0x14);
+	sio(0x20,0x15);
+	sio(0x20,0x16);
+	
+	
+}
 
 
 
 
-// sir 0x20 0x08 0xff // set interupt when value against DEFVAL (INTCONn):
+
 
 
 // odczyt klawisza
 // sio 0x20 0x12 // GPIOA 0x20 A - stan aktualny
 // sio 0x20 0x10 // stan z przerwania
-
-
-
-// sir 0x21 0x0a 0x20 // write IOCON 0x21 SEQOP disabled
-
-
 
 
