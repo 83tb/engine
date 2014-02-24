@@ -32,6 +32,11 @@ void setup() {
   Serial.println("Log: Engine console initialized. Ready when you are.");
   Serial.println("Hint: Type h for help");
   
+  
+  // attachInterrupt(0, readButton, FALLING); //pin 2
+  
+  
+  
 }
 
 
