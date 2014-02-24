@@ -216,7 +216,7 @@ void i2c_scan() {
 
 
 
-
+/*
 
 void readCurrent() {
   float val;
@@ -234,7 +234,7 @@ void readCurrent() {
 }
 
 
-
+*/
 
 void comment() {
  
