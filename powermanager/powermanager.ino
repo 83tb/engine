@@ -161,7 +161,7 @@ void sir_func() {
 
 void sir(int address,int registry,int packet) {
 	
-   Serial.println("---------------------------------------");
+   Serial.println("---------------------------------------------------------");
    
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: 0x");
@@ -196,7 +196,7 @@ void sir(int address,int registry,int packet) {
 
 void sio(int address,int registry) {
 
-   Serial.println("---------------------------------------");
+   Serial.println("---------------------------------------------------------");
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: 0x");
    Serial.print(address, HEX);
