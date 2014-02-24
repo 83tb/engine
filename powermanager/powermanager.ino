@@ -19,7 +19,7 @@ void setup() {
   setDefaultValue(0x20);
   setSeqopDisabled(0x20);
 
-  sCmd.setDefaultHandler(unrecognized);      // co jesli nie ma takiej komendy]
+  sCmd.setDefaultHandler(unrecognized);      
   sCmd.addCommand("#", comment);
   sCmd.addCommand("rb", readButton);
   sCmd.addCommand("h", help);  
@@ -185,9 +185,7 @@ void sir(int address,int registry,int packet) {
   { 
     char c = Wire.read(); // receive a byte as character
     Serial.println(c, BIN);
-     
 
-    // print the character
   }
   delay(500);
      
