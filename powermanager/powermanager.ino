@@ -40,45 +40,17 @@ Adafruit_MCP23017 mcp;
 #define BOOST 6
 #define RESET 7
 
-#define ONE_WIRE_BUS 2
-
-SerialCommand sCmd;     // obiekt komunikacji Serial
-//OneWire oneWire(ONE_WIRE_BUS);
-//DallasTemperature sensors(&oneWire);
+SerialCommand sCmd; 
 
 
-
-void pulse(int high) {
- 
-  
-  for (int steps = 20; steps < high; steps++) { 
-    // turn the pin on:
-  analogWrite(MAIN_PWM, steps);
-  analogWrite(ANALOG_PWM, steps);
-  delay(10);
- 
-  }
-  
-  for (int steps = high; steps > 20; steps--) { 
-    // turn the pin on:
-  analogWrite(MAIN_PWM, steps);
-  analogWrite(ANALOG_PWM, steps);
-  delay(10);
- 
-  }
-  
-  
- 
-  
-  
+void loop() {
+  sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
 
-
-
-
+  
 void setup() {
-       // Ustawiam PIN jako wyjscie analogowe
-     // Dioda wylaczona
+  // Ustawiam PIN jako wyjscie analogowe
+  // Dioda wylaczona
   pinMode(MAIN_PWM, OUTPUT); 
  
  
@@ -90,32 +62,23 @@ void setup() {
   pinMode(RESET, OUTPUT);  
   digitalWrite(ENABLE, HIGH); 
   digitalWrite(BOOST, HIGH); 
-  
-  
- 
   digitalWrite(RESET, HIGH); 
   
+  
   pulse(40);
   pulse(40);
   pulse(40);
  
   
-  Wire.begin();
-  
- setup_input(0x20);
- setup_output(0x21);
+  setup_input(0x20);
+  setup_output(0x21);
  
-  
- //setup_output(0x68);
-  
-  
-  
-
   Serial.begin(9600);
 
   // Setup callbacks for SerialCommand commands
   sCmd.setDefaultHandler(unrecognized);      // co jesli nie ma takiej komendy]
   
+  /*
   sCmd.addCommand("spf", setPwmAndFreq);
   sCmd.addCommand("sdl", setDigitalLevel);
 
@@ -128,14 +91,16 @@ void setup() {
   
   sCmd.addCommand("bst", boost);
   sCmd.addCommand("unbst", unboost);
-   sCmd.addCommand("rst", resetBoard);
+  sCmd.addCommand("rst", resetBoard);
+  */
+  
    
   //sCmd.addCommand("ffu", flipFreqUp);
   //sCmd.addCommand("ffd", flipFreqDown);
   
    
   sCmd.addCommand("#", comment);
-  sCmd.addCommand("ww", writeWire);
+
   
   sCmd.addCommand("mt", match);
   
@@ -143,7 +108,7 @@ void setup() {
   sCmd.addCommand("h", help);
   
   sCmd.addCommand("i2c", i2c_scan);
-  //sCmd.addCommand("talk", talk);
+
  
   sCmd.addCommand("sir", sir);
   sCmd.addCommand("sio", sio);
@@ -161,24 +126,15 @@ void setup() {
 }
 
 
-/*
-void temperature() {
- sensors.requestTemperatures();
- 
-  Serial.print("Info: {'temperature':'");
-  
-  
-  Serial.print(sensors.getTempCByIndex(0));  
-  Serial.println("'}");
 
-  
-}
-*/
+
+
 
 void help(){
  
- Serial.println("");
+ 	Serial.println("");
  
+ /*
  Serial.println("Hint: sdl: sets digital level (automatic freq)");
  Serial.println("Hint: spf: sets pwm and frequency");
  Serial.println("Hint: sa: sets analog PWM");
@@ -189,35 +145,20 @@ void help(){
  Serial.println("Hint: rst: resets LED control board");
  //Serial.println("Hint: ffu: FREQ ON");
  //Serial.println("Hint: ffd: FREQ OFF");
-  
- Serial.println("Hint: h: prints help");
- Serial.println("Hint: rc: reads current");
- Serial.println("Hint: rca: reads average current");
- Serial.println("Hint: i2c: i2c scanner");
- Serial.println("Hint: temp: thermal sensor on pin 2 - one wire, DS18B20");
- Serial.println("Hint: talk: talks to i2c");
- Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
+ */
  
- 
- 
- Serial.println("\nHint: Undocumented");
- Serial.println("Hint: rw: readWire");
- Serial.println("Hint: ww: writeWire");
- 
- 
- 
- 
- 
- 
- Serial.println("\n");
+ 	Serial.println("Hint: h: prints help");
+ 	Serial.println("Hint: rc: reads current");
+ 	Serial.println("Hint: rca: reads average current");
+ 	Serial.println("Hint: i2c: i2c scanner");
+ 	Serial.println("Hint: temp: thermal sensor on pin 2 - one wire, DS18B20");
+ 	Serial.println("Hint: talk: talks to i2c");
+ 	Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
+ 	Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
+ 	Serial.println("Hint: # : comment");
+	Serial.println("\n");
  
 
- 
- 
- 
- 
- 
-  
 }
 
 
@@ -264,34 +205,45 @@ void i2c_scan() {
   
 }
   
-void loop() {
-  sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
+
+
+
+
+
+
+
+
+void readCurrent() {
+  float val;
+  val = analogRead(RCPIN);    // read the input pin
+  
+  float A = val*2;
+  
+  Serial.print("Info: {'current':'");
+  
+  
+  Serial.print(val);  
+  Serial.println("'}");
+  
+  
 }
 
 
 
-void writeWire() {
+
+void comment() {
  
-  Wire.beginTransmission(39); // transmit to device #44 (0x2f)
-                              // device address is specified in datasheet
-  Wire.write(byte(0x00));            // sends instruction byte  
-  Wire.write(40);             // sends potentiometer value byte  
-  Wire.endTransmission();     // stop transmitting
-
+  
 }
 
 
-void readWire() {
- 
-   Wire.requestFrom(39, 1);    // request 6 bytes from slave device #2
-
-   while(Wire.available())    // slave may send less than requested
-  { 
-    char c = Wire.read(); // receive a byte as character
-    Serial.print(c);         // print the character
-  }
-  delay(500);
+// nie rozpoznano komendy
+void unrecognized(const char *command) {
+  Serial.println("What? I don't know this command. ");
 }
+
+
+/*
 
 
 
@@ -380,10 +332,6 @@ void setDigitalLevel() {
 }
 
 
-
-
-
-
 void setAnalogPwm() {
   char *arg;
   arg = sCmd.next();    // Przyklad z buforowaniem, w ten sposob mozemy przesylac argumenty
@@ -406,43 +354,6 @@ void setAnalogPwm() {
     Serial.println("Please, add an argument 0-255");
   }
 }
-
-
-
-
-
-
-
-void readCurrent() {
-  float val;
-  val = analogRead(RCPIN);    // read the input pin
-  
-  float A = val*2;
-  
-  Serial.print("Info: {'current':'");
-  
-  
-  Serial.print(val);  
-  Serial.println("'}");
-  
-  
-}
-
-
-
-
-void comment() {
- 
-  
-}
-
-
-// nie rozpoznano komendy
-void unrecognized(const char *command) {
-  Serial.println("What? I don't know this command. ");
-}
-
-
 
 
 void enable() {
@@ -508,38 +419,7 @@ void readCurrentAvg() {
   
 }
 
-/**
- * Divides a given PWM pin frequency by a divisor.
- * 
- * The resulting frequency is equal to the base frequency divided by
- * the given divisor:
- *   - Base frequencies:
- *      o The base frequency for pins 3, 9, 10, and 11 is 31250 Hz.
- *      o The base frequency for pins 5 and 6 is 62500 Hz.
- *   - Divisors:
- *      o The divisors available on pins 5, 6, 9 and 10 are: 1, 8, 64,
- *        256, and 1024.
- *      o The divisors available on pins 3 and 11 are: 1, 8, 32, 64,
- *        128, 256, and 1024.
- * 
- * PWM frequencies are tied together in pairs of pins. If one in a
- * pair is changed, the other is also changed to match:
- *   - Pins 5 and 6 are paired on timer0
- *   - Pins 9 and 10 are paired on timer1
- *   - Pins 3 and 11 are paired on timer2
- * 
- * Note that this function will have side effects on anything else
- * that uses timers:
- *   - Changes on pins 3, 5, 6, or 11 may cause the delay() and
- *     millis() functions to stop working. Other timing-related
- *     functions may also be affected.
- *   - Changes on pins 9 or 10 will cause the Servo library to function
- *     incorrectly.
- * 
- * Thanks to macegr of the Arduino forums for his documentation of the
- * PWM frequency divisors. His post can be viewed at:
- *   http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1235060559/0#4
- */
+
 void setPwmFrequency(int pin, int divisor) {
   byte mode;
   if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
@@ -573,44 +453,18 @@ void setPwmFrequency(int pin, int divisor) {
 
 
 
-#define MCP23017_ADDRESS 0x20
-
-// registers
-#define MCP23017_IODIRA 0x00
-#define MCP23017_IPOLA 0x02
-#define MCP23017_GPINTENA 0x04 // 1 to interrupts
-#define MCP23017_DEFVALA 0x06  // 1 to interrupts
-#define MCP23017_INTCONA 0x08 // 1 to interrupts, if it's set to 0 it's compared to value, if 0 it's for default value
-#define MCP23017_IOCONA 0x0A
-#define MCP23017_GPPUA 0x0C // tez na 1
-#define MCP23017_INTFA 0x0E
-#define MCP23017_INTCAPA 0x10
-#define MCP23017_GPIOA 0x12
-#define MCP23017_OLATA 0x14 
-
-
-#define MCP23017_IODIRB 0x01
-#define MCP23017_IPOLB 0x03
-#define MCP23017_GPINTENB 0x05
-#define MCP23017_DEFVALB 0x07
-#define MCP23017_INTCONB 0x09
-#define MCP23017_IOCONB 0x0B
-#define MCP23017_GPPUB 0x0D
-#define MCP23017_INTFB 0x0F
-#define MCP23017_INTCAPB 0x11
-#define MCP23017_GPIOB 0x13
-#define MCP23017_OLATB 0x15
-
-
-void talk() {
-  // The LED will 'echo' the button
+void temperature() {
+ sensors.requestTemperatures();
+ 
+  Serial.print("Info: {'temperature':'");
   
-  mcp.begin(0x27);      // use default address 0
-  mcp.pinMode(3, INPUT);
-  mcp.pullUp(3, HIGH);  // turn on a 100K pullup internally
-  Serial.println(digitalRead(3));
+  
+  Serial.print(sensors.getTempCByIndex(0));  
+  Serial.println("'}");
+
   
 }
+*/
 
 
 
