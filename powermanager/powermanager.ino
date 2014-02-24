@@ -26,10 +26,7 @@ void setup() {
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
   sCmd.addCommand("sio", sio_func);
-  
-  
 
-  
   Serial.println("-------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
   Serial.println("Log: Engine console initialized. Ready when you are.");
@@ -48,9 +45,7 @@ void loop() {
 void help(){
  
  	Serial.println("");
- 
- 
- 
+
  	Serial.println("Hint: h: prints help");
  	Serial.println("Hint: rc: reads current");
  	Serial.println("Hint: rca: reads average current");
@@ -61,7 +56,6 @@ void help(){
  	Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
  	Serial.println("Hint: # : comment");
 	Serial.println("\n");
- 
 
 }
 
@@ -76,10 +70,7 @@ void i2c_scan() {
   nDevices = 0;
   for(address = 1; address < 127; address++ ) 
   {
-    // The i2c_scanner uses the return value of
-    // the Write.endTransmisstion to see if
-    // a device did acknowledge to the address.
-    Wire.beginTransmission(address);
+	Wire.beginTransmission(address);
     error = Wire.endTransmission();
 
     if (error == 0)
@@ -126,9 +117,6 @@ void unrecognized(const char *command) {
 }
 
 
-
-
-
 void sir_func() {
   
   
@@ -137,75 +125,37 @@ void sir_func() {
   int packet;
   char *arg;
 
-  // Serial.println("We're in setFrequency");
+  
   arg = sCmd.next();
   if (arg != NULL) {
-   
-  //  Serial.print("First argument was: ");
-    address = strtol(arg, NULL, 16);
-     // transmit to device #44 (0x2f)
-    
+	  address = strtol(arg, NULL, 16);
+
   }
   else {
-    Serial.println("No arguments");
+	  Serial.println("No arguments");
   }
 
   arg = sCmd.next();
   if (arg != NULL) {
-     registry = strtol(arg, NULL, 16);
-   // Serial.print("Second argument was: ");
-   
-   
-    
+	  registry = strtol(arg, NULL, 16);
+
     
   }
   else {
-    Serial.println("No second argument");
+	  Serial.println("No second argument");
   }
   
   
   arg = sCmd.next();
   if (arg != NULL) {
-    packet = strtol(arg, NULL, 16);
-   // Serial.print("Second argument was: ");
-   
-   
-    
+	  packet = strtol(arg, NULL, 16);
     
   }
   else {
     Serial.println("No third argument");
   }
   
-  
-  
-  
-   Wire.beginTransmission(address);
-   Serial.print("Adres urzadzenia: ");
-   Serial.println(address);
-   Serial.print("Adres rejestru: ");
-   Serial.println(registry);
-   
-   Wire.write(registry); 
-   
-   Serial.print("Wysylamy pakiet: ");
-   Serial.println(packet);
-   Wire.write(packet);    
-   
-   Serial.println("Odczytano: ");
-   Wire.endTransmission(); 
-   Wire.requestFrom(address, 1); 
-   
-   while(Wire.available())    // slave may send less than requested
-  { 
-    char c = Wire.read(); // receive a byte as character
-    Serial.println(c, BIN);
-     
-
-    // print the character
-  }
-  delay(500);
-     
+  sir(address,registry,packet);
   
 }
 
@@ -248,12 +198,6 @@ void sir(int address,int registry,int packet) {
 
 void sio(int address,int registry) {
 
-
-	  /*
-   address = strtol(address_, NULL, 16);
-
-   registry = strtol(registry_, NULL, 16);
- */
   
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: ");
@@ -268,9 +212,9 @@ void sio(int address,int registry) {
    Wire.endTransmission();  
    Wire.requestFrom(address, 1); 
    
-   while(Wire.available())    // slave may send less than requested
+   while(Wire.available())  
   { 
-    char c = Wire.read(); // receive a byte as character
+    char c = Wire.read(); 
     Serial.println(c, BIN);
      
   }
@@ -288,70 +232,26 @@ void sio_func() {
   int packet;
   char *arg;
 
-  // Serial.println("We're in setFrequency");
+
   arg = sCmd.next();
   if (arg != NULL) {
-   
-  //  Serial.print("First argument was: ");
-    address = strtol(arg, NULL, 16);
-     // transmit to device #44 (0x2f)
-    
+	  address = strtol(arg, NULL, 16);   
   }
+  
   else {
-    Serial.println("No arguments");
+	  Serial.println("No arguments");
   }
 
   arg = sCmd.next();
   if (arg != NULL) {
-     registry = strtol(arg, NULL, 16);
-   // Serial.print("Second argument was: ");
-   
-   
-    
-    
+	  registry = strtol(arg, NULL, 16);
   }
+  
   else {
-    Serial.println("No second argument");
+	  Serial.println("No second argument");
   }
   
-  /*
-  arg = sCmd.next();
-  if (arg != NULL) {
-    long packet = strtol(arg, NULL, 16);
-   // Serial.print("Second argument was: ");
-   
-   
-    
-    
-  }
-  else {
-    Serial.println("No third argument");
-  }
-  
-  */
-  
-  
-   Wire.beginTransmission(address);
-   Serial.print("Adres urzadzenia: ");
-   Serial.println(address);
-   Serial.print("Adres rejestru: ");
-   Serial.println(registry);
-   
-   Wire.write(registry); 
-   //Wire.write(packet);    
-   
-   Serial.println("Odczytano: ");
-   Wire.endTransmission();  
-   Wire.requestFrom(address, 1); 
-   
-   while(Wire.available())    // slave may send less than requested
-  { 
-    char c = Wire.read(); // receive a byte as character
-    Serial.println(c, BIN);
-     
-  }
-  delay(500);
-  
+   sio(address,registry);
   
 }
   
@@ -407,7 +307,7 @@ void setDefaultValue(int ad)
 	sir(ad,0x06,0xff);
 	sir(ad,0x07,0xff);
 
-	sir(ad,0x08,0xff); // set interupt when value against DEFVAL (INTCONn):
+	sir(ad,0x08,0xff); 
 	
 }
 
@@ -421,6 +321,7 @@ void setSeqopDisabled(int ad)
 void readButton()
 {
 	sio(0x20,0x10);
+	
 	sio(0x20,0x11);
 	sio(0x20,0x12);
 	sio(0x20,0x13);
