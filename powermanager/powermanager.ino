@@ -166,14 +166,14 @@ void sir(int address,int registry,int packet) {
 
  
    Wire.beginTransmission(address);
-   Serial.print("Adres urzadzenia: ");
+   Serial.print("Adres urzadzenia: 0x");
    Serial.print(address, HEX);
-   Serial.print("    Adres rejestru: ");
+   Serial.print("    Adres rejestru: 0x");
    Serial.println(registry, HEX);
    
    Wire.write(registry); 
    
-   Serial.print("Wysylamy pakiet: ");
+   Serial.print("Wysylamy pakiet: 0x");
    Serial.println(packet, HEX);
    Wire.write(packet);    
    
@@ -185,7 +185,7 @@ void sir(int address,int registry,int packet) {
   { 
     char c = Wire.read(); // receive a byte as character
     Serial.print(c, BIN);
-	Serial.print(" | ");
+	Serial.print(" | 0x");
     Serial.println(c, HEX);
 
   }
@@ -200,9 +200,9 @@ void sio(int address,int registry) {
 
   
    Wire.beginTransmission(address);
-   Serial.print("Adres urzadzenia: ");
+   Serial.print("Adres urzadzenia: 0x");
    Serial.print(address, HEX);
-   Serial.print("   Adres rejestru: ");
+   Serial.print("   Adres rejestru: 0x");
    Serial.println(registry, HEX);
    
    Wire.write(registry); 
@@ -216,7 +216,7 @@ void sio(int address,int registry) {
   { 
     char c = Wire.read(); 
     Serial.print(c, BIN);
-	Serial.print(" | ");
+	Serial.print(" | 0x");
     Serial.println(c, HEX);
 	
      
