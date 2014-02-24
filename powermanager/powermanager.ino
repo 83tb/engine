@@ -712,5 +712,37 @@ void match()
 }
 
 
+// no need
+// input polarity not inverted
+// sir 0x20 0x02 0x00 A 
+// sir 0x20 0x03 0x00 B
+// sir 0x21 0x02 0x00 A 
+// sir 0x21 0x02 0x00 B
+
+// pull ups
+// sir 0x20 0x0c 0xff  // set x20 A  set pull-up resistors on 
+// sir 0x20 0x0d 0xff  // set x20 B  set pull-up resistors on
+
+
+// sir 0x20 0x04 0xff  // set x20 A  input on change enable
+// sir 0x20 0x05 0xff  // set x20 B  input on change enable
+// sir 0x20 0x06 0xff  // set x20 A  set default value (DEFVALn)
+// sir 0x20 0x07 0xff  // set x20 B  set default value (DEFVALn)
+
+
+
+
+// sir 0x20 0x08 0xff // set interupt when value against DEFVAL (INTCONn):
+
+
+// odczyt klawisza
+// sio 0x20 0x12 // GPIOA 0x20 A - stan aktualny
+// sio 0x20 0x10 // stan z przerwania
+
+
+
+// sir 0x21 0x0a 0x20 // write IOCON 0x21 SEQOP disabled
+
+
 
 
