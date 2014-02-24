@@ -47,11 +47,7 @@ void help(){
  	Serial.println("");
 
  	Serial.println("Hint: h: prints help");
- 	Serial.println("Hint: rc: reads current");
- 	Serial.println("Hint: rca: reads average current");
  	Serial.println("Hint: i2c: i2c scanner");
- 	Serial.println("Hint: temp: thermal sensor on pin 2 - one wire, DS18B20");
- 	Serial.println("Hint: talk: talks to i2c");
  	Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
  	Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
  	Serial.println("Hint: # : comment");
