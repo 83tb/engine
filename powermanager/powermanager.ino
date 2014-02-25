@@ -2,16 +2,20 @@
 // 2013
 
 
-#define I2C_DELAY 10
+#define I2C_DELAY 0
 
 #include <Wire.h>
 #include <SerialCommand.h>
 
 SerialCommand sCmd; 
 
+// volatile int state = LOW;
+
 void setup() {
   Serial.begin(9600);
   Wire.begin();
+  pinMode(2, INPUT);
+  pinMode(13, OUTPUT);
   
   setup_input(0x20);
   setup_output(0x21);
@@ -37,7 +41,7 @@ void setup() {
   Serial.println("Hint: Type h for help");
   
   
-  // attachInterrupt(0, readButton, FALLING); //pin 2
+  attachInterrupt(0, testInterrupt, FALLING); //pin 2
   
   
   
@@ -236,6 +240,33 @@ void sio(int address,int registry) {
 
 
 
+
+void sio_raw(int address,int registry) {
+
+   
+   Wire.beginTransmission(address);
+   
+   Wire.write(registry); 
+  
+   
+ 
+   Wire.endTransmission();  
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())  
+  { 
+    char c = Wire.read(); 
+    
+ 
+	
+     
+  }
+
+  
+  
+}
+
+
 void i2c_read() {
 
   	int address;
@@ -379,11 +410,6 @@ void readButton()
 	sio(0x20,0x10);
 	
 	sio(0x20,0x11);
-	sio(0x20,0x12);
-	sio(0x20,0x13);
-	sio(0x20,0x14);
-	sio(0x20,0x15);
-	sio(0x20,0x16);
 	
 	
 }
@@ -399,6 +425,25 @@ void resetInterrupts(int ad)
 
 
 
+
+void testInterrupt()
+{
+        
+	// noInterrupts();
+	
+
+        digitalWrite(13, HIGH); 
+        Serial.println("doing");
+        interrupts();
+	readButton();
+        Serial.println("done");
+        // digitalWrite(13, LOW); 
+        
+
+	// 
+	
+	
+}
 
 
 
