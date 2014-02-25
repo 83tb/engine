@@ -19,6 +19,7 @@ void setup() {
   setInterruptEnable(0x20);
   setDefaultValue(0x20);
   setSeqopDisabled(0x20);
+  resetInterrupts(0x20);
 
   sCmd.setDefaultHandler(unrecognized);      
   sCmd.addCommand("#", comment);
@@ -388,10 +389,10 @@ void readButton()
 }
 
 
-void resetInterrupts()
+void resetInterrupts(int ad)
 {
-	sio(0x20,0x10);
-	sio(0x20,0x11);
+	sio(ad,0x10);
+	sio(ad,0x11);
 	
 	
 }
