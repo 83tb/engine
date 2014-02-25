@@ -2,6 +2,7 @@
 // 2013
 
 
+#define I2C_DELAY 10
 
 #include <Wire.h>
 #include <SerialCommand.h>
@@ -29,7 +30,7 @@ void setup() {
   sCmd.addCommand("read", i2c_read);
   
 
-  Serial.println("-------------------\n"); 
+  Serial.println("---------------------------------------------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
   Serial.println("Log: Engine console initialized. Ready when you are.");
   Serial.println("Hint: Type h for help");
@@ -195,7 +196,7 @@ void sir(int address,int registry,int packet) {
     Serial.println(c, HEX);
 
   }
-  delay(500);
+  delay(I2C_DELAY);
      
   
 }
@@ -227,7 +228,7 @@ void sio(int address,int registry) {
 	
      
   }
-  delay(500);
+  delay(I2C_DELAY);
   
   
 }
@@ -254,7 +255,7 @@ void i2c_read() {
 	
      
 	   }
-	   delay(500);
+	   delay(I2C_DELAY);
 		
 		
 	    
