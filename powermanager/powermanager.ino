@@ -388,5 +388,16 @@ void readButton()
 }
 
 
+void resetInterrupts()
+{
+	sio(0x20,0x10);
+	sio(0x20,0x11);
+	
+	
+}
+
+
+
+
 
 
