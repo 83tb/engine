@@ -15,7 +15,7 @@ void setup() {
   setup_input(0x20);
   setup_output(0x21);
   setPullUp(0x20);
-  setInputOnChange(0x20);
+  setInterruptEnable(0x20);
   setDefaultValue(0x20);
   setSeqopDisabled(0x20);
 
@@ -300,7 +300,8 @@ void setPullUp(int ad)
 }
 
 
-void setInputOnChange(int ad)
+// set interrupt enable
+void setInterruptEnable(int ad)
 {
 	sir(ad,0x04,0xff);
 	sir(ad,0x05,0xff);
@@ -313,7 +314,11 @@ void setDefaultValue(int ad)
 	sir(ad,0x06,0xff);
 	sir(ad,0x07,0xff);
 
-	sir(ad,0x08,0xff); 
+
+	// set interrupt on change
+	sir(ad,0x08,0x00); 
+	sir(ad,0x09,0x00); 
+	
 	
 }
 
