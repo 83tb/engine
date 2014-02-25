@@ -58,6 +58,7 @@ void help(){
  	Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
  	Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
 	Serial.println("Hint: rb: read button");
+	Serial.println("Hint: read: read i2c");
  	Serial.println("Hint: # : comment");
 	Serial.println("\n");
 
