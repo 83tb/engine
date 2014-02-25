@@ -429,14 +429,16 @@ void resetInterrupts(int ad)
 void testInterrupt()
 {
         
-
+        // 
+	
         digitalWrite(13, HIGH); 
         Serial.println("doing");
         interrupts();
-	readButton();
+        detachInterrupt(0);
+        readButton();
         Serial.println("done");
         digitalWrite(13, LOW); 
-
+        attachInterrupt(0, testInterrupt, FALLING);
 	
 	
 }
