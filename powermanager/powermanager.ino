@@ -316,8 +316,8 @@ void setDefaultValue(int ad)
 
 
 	// set interrupt on change
-	sir(ad,0x08,0x00); 
-	sir(ad,0x09,0x00); 
+	sir(ad,0x08,0xff); 
+	sir(ad,0x09,0xff);
 	
 	
 }
