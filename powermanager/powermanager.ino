@@ -26,6 +26,8 @@ void setup() {
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
   sCmd.addCommand("sio", sio_func);
+  sCmd.addCommand("read", i2c_read);
+  
 
   Serial.println("-------------------\n"); 
   Serial.println("POWERMANAGER, @83TB\n"); 
@@ -228,6 +230,46 @@ void sio(int address,int registry) {
   
   
 }
+
+
+
+void i2c_read() {
+
+  	int address;
+	char *arg;
+
+	arg = sCmd.next();
+	if (arg != NULL) {
+   
+	    address = strtol(arg, NULL, 16);
+	    Wire.requestFrom(address, 1); 
+   
+	    while(Wire.available())  
+	   { 
+	     char c = Wire.read(); 
+	     Serial.print(c, BIN);
+	 	Serial.print(" | 0x");
+	     Serial.println(c, HEX);
+	
+     
+	   }
+	   delay(500);
+		
+		
+	    
+	  }
+	  
+	
+	
+	else {
+	    Serial.println("Add address of the device, like 0x20");
+	}
+  
+   
+  
+  
+}
+  
   
 
 void sio_func() {
