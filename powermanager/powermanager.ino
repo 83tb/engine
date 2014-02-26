@@ -41,7 +41,7 @@ void setup() {
   Serial.println("Hint: Type h for help");
   
   
-  attachInterrupt(0, testInterrupt, FALLING); //pin 2
+  // attachInterrupt(0, testInterrupt, FALLING); //pin 2
   
   
   
@@ -51,6 +51,12 @@ void setup() {
 
 
 void loop() {
+	
+  int a = digitalRead(2);
+  if (a==0) {
+	  testInterrupt();
+  }	
+	
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
 
@@ -429,16 +435,14 @@ void resetInterrupts(int ad)
 void testInterrupt()
 {
         
-        // 
-	
+
         digitalWrite(13, HIGH); 
         Serial.println("doing");
         interrupts();
-        detachInterrupt(0);
-        readButton();
+		readButton();
         Serial.println("done");
         digitalWrite(13, LOW); 
-        attachInterrupt(0, testInterrupt, FALLING);
+
 	
 	
 }
