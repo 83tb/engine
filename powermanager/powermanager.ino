@@ -27,7 +27,7 @@ void setup() {
 
   sCmd.setDefaultHandler(unrecognized);      
   sCmd.addCommand("#", comment);
-  sCmd.addCommand("rb", readButton);
+  //sCmd.addCommand("rb", readButton);
   sCmd.addCommand("h", help);  
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
@@ -411,7 +411,7 @@ void setSeqopDisabled(int ad)
 }
 
 
-void readButton()
+int readButton()
 {
 	sio(0x20,0x10);
 	
@@ -438,7 +438,7 @@ void testInterrupt()
 
         digitalWrite(13, HIGH); 
         Serial.println("doing");
-        interrupts();
+        //interrupts();
 		readButton();
         Serial.println("done");
         digitalWrite(13, LOW); 
