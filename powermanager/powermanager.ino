@@ -56,7 +56,7 @@ void loop() {
   if (a==0) {
 	  testInterrupt();
   }	
-	
+
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
 
@@ -413,9 +413,10 @@ void setSeqopDisabled(int ad)
 
 void readButton()
 {
-	sio(0x20,0x10);
+	// sio(0x20,0x10);
 	
 	sio(0x20,0x11);
+       
 	
 	
 }
@@ -435,13 +436,11 @@ void resetInterrupts(int ad)
 void testInterrupt()
 {
         
-
-        digitalWrite(13, HIGH); 
         Serial.println("doing");
-        interrupts();
-		readButton();
+        // interrupts();
+	readButton();
         Serial.println("done");
-        digitalWrite(13, LOW); 
+         
 
 	
 	
