@@ -27,7 +27,7 @@ void setup() {
 
   sCmd.setDefaultHandler(unrecognized);      
   sCmd.addCommand("#", comment);
-  //sCmd.addCommand("rb", readButton);
+  sCmd.addCommand("rb", readButton);
   sCmd.addCommand("h", help);  
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
@@ -58,7 +58,6 @@ void loop() {
   }	
 	
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
-  //delay(10);
 }
 
 
@@ -215,7 +214,7 @@ void sir(int address,int registry,int packet) {
 
 
 
-int sio(int address,int registry) {
+void sio(int address,int registry) {
 
    Serial.println("---------------------------------------------------------");
    Wire.beginTransmission(address);
@@ -230,10 +229,10 @@ int sio(int address,int registry) {
    Serial.print("Odczytano:     ");
    Wire.endTransmission();  
    Wire.requestFrom(address, 1); 
-   char c;
+   
    while(Wire.available())  
   { 
-    c = Wire.read(); 
+    char c = Wire.read(); 
     Serial.print(c, BIN);
 	Serial.print(" | 0x");
     Serial.println(c, HEX);
@@ -241,7 +240,6 @@ int sio(int address,int registry) {
      
   }
   delay(I2C_DELAY);
-  return c;
   
   
 }
@@ -413,11 +411,11 @@ void setSeqopDisabled(int ad)
 }
 
 
-int readButton()
+void readButton()
 {
-	// sio(0x20,0x10);
+	sio(0x20,0x10);
 	
-	return sio(0x20,0x10);
+	sio(0x20,0x11);
 	
 	
 }
@@ -438,12 +436,12 @@ void testInterrupt()
 {
         
 
-        
+        digitalWrite(13, HIGH); 
         Serial.println("doing");
         interrupts();
-        Serial.println(readButton());
+		readButton();
         Serial.println("done");
-        
+        digitalWrite(13, LOW); 
 
 	
 	
