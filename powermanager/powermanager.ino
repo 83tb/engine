@@ -9,7 +9,7 @@
 
 SerialCommand sCmd; 
 
-// volatile int state = LOW;
+volatile int state = LOW;
 
 void setup() {
   Serial.begin(9600);
@@ -51,12 +51,14 @@ void setup() {
 
 
 void loop() {
-	
+  delay(100);	
+  
   int a = digitalRead(2);
   if (a==0) {
 	  testInterrupt();
   }	
-
+  delay(100);	
+  
   sCmd.readSerial();     // Przetwarzanie, to wszystko co dzieje sie w petli
 }
 
@@ -214,8 +216,8 @@ void sir(int address,int registry,int packet) {
 
 
 
-void sio(int address,int registry) {
-
+int sio(int address,int registry) {
+  char c;
    Serial.println("---------------------------------------------------------");
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: 0x");
@@ -232,7 +234,7 @@ void sio(int address,int registry) {
    
    while(Wire.available())  
   { 
-    char c = Wire.read(); 
+    c = Wire.read(); 
     Serial.print(c, BIN);
 	Serial.print(" | 0x");
     Serial.println(c, HEX);
@@ -240,7 +242,7 @@ void sio(int address,int registry) {
      
   }
   delay(I2C_DELAY);
-  
+  return c;
   
 }
 
@@ -272,6 +274,16 @@ void sio_raw(int address,int registry) {
   
 }
 
+
+
+void ledon(int value) {
+  
+  // state = ~state;
+  
+  sir(0x21,0x12,value);
+  sir(0x21,0x13,0x00);
+  
+}
 
 void i2c_read() {
 
@@ -412,12 +424,23 @@ void setSeqopDisabled(int ad)
 
 
 void readButton()
-{
+{        
+        
+  // sio(0x20,0x11);
+  
+  //int oo = sio(0x20,0x0E);
 	// sio(0x20,0x10);
-	
-	sio(0x20,0x11);
-       
-	
+        
+        
+     //   if (oo != 0) {
+          
+        	unsigned int value = sio(0x20,0x11);
+        	Serial.println(value, HEX);
+
+                ledon(value);
+      //  }
+  	
+        
 	
 }
 
