@@ -32,6 +32,10 @@ void setup() {
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
   sCmd.addCommand("sio", sio_func);
+  sCmd.addCommand("sioraw", sior_func);
+
+
+  
   sCmd.addCommand("read", i2c_read);
   
 
@@ -203,7 +207,7 @@ void sir(int address,int registry,int packet) {
    
    while(Wire.available())    // slave may send less than requested
   { 
-    char c = Wire.read(); // receive a byte as character
+    byte c = Wire.read(); // receive a byte as character
     Serial.print(c, BIN);
 	Serial.print(" | 0x");
     Serial.println(c, HEX);
@@ -217,7 +221,7 @@ void sir(int address,int registry,int packet) {
 
 
 int sio(int address,int registry) {
-  char c;
+  byte c;
    Serial.println("---------------------------------------------------------");
    Wire.beginTransmission(address);
    Serial.print("Adres urzadzenia: 0x");
@@ -252,25 +256,19 @@ int sio(int address,int registry) {
 void sio_raw(int address,int registry) {
 
    
-   Wire.beginTransmission(address);
-   
-   Wire.write(registry); 
-  
-   
- 
-   Wire.endTransmission();  
+
    Wire.requestFrom(address, 1); 
    
    while(Wire.available())  
   { 
-    char c = Wire.read(); 
+    byte c = Wire.read(); 
     
  
 	
      
   }
 
-  
+  Serial.println(c, HEX);
   
 }
 
@@ -356,7 +354,39 @@ void sio_func() {
 }
   
   
+
+void sior_func() {
   
+  
+  int address;
+  int registry;
+  int packet;
+  char *arg;
+
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+	  address = strtol(arg, NULL, 16);   
+  }
+  
+  else {
+	  Serial.println("No arguments");
+  }
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+	  registry = strtol(arg, NULL, 16);
+  }
+  
+  else {
+	  Serial.println("No second argument");
+  }
+  
+   sio_raw(address,registry);
+  
+}
+  
+    
 
 void setup_output(char ad)
 {
@@ -459,6 +489,7 @@ void resetInterrupts(int ad)
 void testInterrupt()
 {
         
+  
         Serial.println("doing");
         // interrupts();
 	readButton();
