@@ -32,7 +32,7 @@ void setup() {
   sCmd.addCommand("i2c", i2c_scan); 
   sCmd.addCommand("sir", sir_func);
   sCmd.addCommand("sio", sio_func);
-  sCmd.addCommand("sioraw", sior_func);
+  sCmd.addCommand("sior", sior_func);
 
 
   
@@ -253,15 +253,15 @@ int sio(int address,int registry) {
 
 
 
-void sio_raw(int address,int registry) {
-
+int sio_raw(int address) {
+byte c;
    
 
    Wire.requestFrom(address, 1); 
    
    while(Wire.available())  
   { 
-    byte c = Wire.read(); 
+    c = Wire.read(); 
     
  
 	
@@ -269,7 +269,7 @@ void sio_raw(int address,int registry) {
   }
 
   Serial.println(c, HEX);
-  
+  return c;
 }
 
 
@@ -369,20 +369,15 @@ void sior_func() {
 	  address = strtol(arg, NULL, 16);   
   }
   
+
+
+
+  
   else {
 	  Serial.println("No arguments");
   }
-
-  arg = sCmd.next();
-  if (arg != NULL) {
-	  registry = strtol(arg, NULL, 16);
-  }
   
-  else {
-	  Serial.println("No second argument");
-  }
-  
-   sio_raw(address,registry);
+  sio_raw(address);
   
 }
   
@@ -468,6 +463,11 @@ void readButton()
         	Serial.println(value, HEX);
 
                 ledon(value);
+                
+                int value2 = sio_raw(0x68);
+        	Serial.println(value, HEX);
+
+                ledon(value2);
       //  }
   	
         
