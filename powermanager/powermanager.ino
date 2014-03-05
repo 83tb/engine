@@ -33,6 +33,8 @@ void setup() {
   sCmd.addCommand("sir", sir_func);
   sCmd.addCommand("sio", sio_func);
   sCmd.addCommand("sior", sior_func);
+  sCmd.addCommand("sirr", sirr_func);
+  
 
 
   
@@ -220,6 +222,40 @@ void sir(int address,int registry,int packet) {
 
 
 
+
+
+
+void sirr(int address,int packet) {
+	
+   Serial.println("---------------------------------------------------------");
+   
+   Wire.beginTransmission(address);
+   Serial.print("Adres urzadzenia: 0x");
+   Serial.print(address, HEX);
+
+   
+   Serial.print("Wysylamy pakiet: 0x");
+   Serial.println(packet, HEX);
+   Wire.write(packet);    
+   
+   Serial.print("Odczytano:   ");
+   Wire.endTransmission(); 
+   Wire.requestFrom(address, 1); 
+   
+   while(Wire.available())    // slave may send less than requested
+  { 
+    byte c = Wire.read(); // receive a byte as character
+    Serial.print(c, BIN);
+	Serial.print(" | 0x");
+    Serial.println(c, HEX);
+
+  }
+  delay(I2C_DELAY);
+     
+  
+}
+
+
 int sio(int address,int registry) {
   byte c;
    Serial.println("---------------------------------------------------------");
@@ -353,7 +389,39 @@ void sio_func() {
   
 }
   
+
+
+
+void sirr_func() {
   
+  
+  int address;
+  int registry;
+  int packet;
+  char *arg;
+
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+	  address = strtol(arg, NULL, 16);   
+  }
+  
+  else {
+	  Serial.println("No arguments");
+  }
+
+  arg = sCmd.next();
+  if (arg != NULL) {
+	  registry = strtol(arg, NULL, 16);
+  }
+  
+  else {
+	  Serial.println("No second argument");
+  }
+  
+   sirr(address,registry);
+  
+}  
 
 void sior_func() {
   
@@ -448,31 +516,58 @@ void setSeqopDisabled(int ad)
 }
 
 
+// funkcje - czy jest przerwanie
+// czy jest mag
+
+
 void readButton()
 {        
-        
-  // sio(0x20,0x11);
-  
-  //int oo = sio(0x20,0x0E);
-	// sio(0x20,0x10);
-        
-        
-     //   if (oo != 0) {
+
           
-        	unsigned int value = sio(0x20,0x11);
+        	byte value = sio_raw(0x68);
         	Serial.println(value, HEX);
-
-                ledon(value);
                 
-                int value2 = sio_raw(0x68);
-        	Serial.println(value, HEX);
-
-                ledon(value2);
+                parse(value);
+                
+                // ledon(value);
+                
+                
+               
+                // podziel na pol
+                // byte
+                
+                // jak policzyc wartosc z value2
+                // idziemy bit po bicie od najstarszeg0, pierwsze 4
+                // jezeli 0 to nastepny bit
+                // jezeli 1 to wlaczasz ten kawalek magistrali
+                // najmlodszymi bitami ktore mozna ustawiac
+                // odczytuje rejestry
+                // przerwanie pochodzi z pierwszego miejsca w hirearchii
+                
+                
+                // odczytac urzadzenia 
+                // zamknij magistrale
+                
+                // sprawdzamy - jak nie ma przerwania - wychodzimy z petli
+                
+                
+                
+                // sirr [output
+                
+                
+                
+                
+        	
       //  }
   	
         
 	
 }
+
+
+
+
+
 
 
 void resetInterrupts(int ad)
@@ -502,3 +597,33 @@ void testInterrupt()
 
 
 
+byte reverse(byte b) {
+   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+   return b;
+}
+
+
+void parse(byte data)
+{
+  
+  byte mask;
+  
+  
+  
+  for (mask = 10000000; mask>0; mask >>= 1) { //iterate through bit mask
+    if (data & mask){ // if bitwise AND resolves to true
+      
+      sirr(0x68, reverse(mask));
+      unsigned int value = sio(0x20,0x11);;
+      Serial.println(value, HEX);
+
+      ledon(value);
+      
+      
+    }
+    
+    delay(1); //delay
+  }
+}
