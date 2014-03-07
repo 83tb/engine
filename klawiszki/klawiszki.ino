@@ -204,9 +204,9 @@ int button_find()
   
   
   if (int_flag){		
-	  for (byte mask = 00000001,mask,expint_index++) {
+	  for (byte mask = 00000001,mask,mask <<=1;) {
 	  {
-	    mask <<=1;
+	    
 	    ++button_index;
 	  }
 	  
