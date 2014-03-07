@@ -124,12 +124,12 @@ int i2cseg_find(){
   byte intseg = sio_raw(I2CSWITCH_ADDR)
   byte mask = 00010000;
   int success_code = 0;
-  int size = sizeof(i2cseg_index)/sizeof(*i2cseg_index)
+  int tsize = sizeof(i2cseg_index)/sizeof(*i2cseg_index)
   
   
   i2cseg_index = 0; // zaczynamy od zera
   
-  for (i2cseg_index,i2cseg_index<size,i2cseg_index++) {
+  for (i2cseg_index,i2cseg_index<tsize,i2cseg_index++) {
 	  if (intseg & mask){
 		  success_code = 1;
 	  
