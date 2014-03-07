@@ -56,6 +56,9 @@
   #define EXP_REG_GPIOB     0x13
   #define EXP_REG_OLATA     0x14
   #define EXP_REG_OLATB     0x15
+  #DEFINE EXP_LENGTH		7
+
+
   
   
 
@@ -75,6 +78,7 @@
   int i2cseg_index;						// index do tablicy adresowej segmentow magistrali
   int expint_index;						// index wiazacy przerwania z expanderami w segmenie magistrali
   int button_index;						// index (finalnie numer) klawisza, ktory wywolal przerwanie
+  
   
   byte exp_interrupt_src_[2][7]   = {
                       {EXP_SEG0_CHIP0_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP3_ADDR, EXP_SEG0_CHIP3_ADDR},
@@ -158,7 +162,7 @@ int chip_find(){
   byte exp_int_reg = exp_seg_int_reg_[i2cseg_index];
   sirr(i2cswitch, i2cseg);			// otwarcie segmentu magistrali
   byte expint = sio(exp_int_chip, exp_int_reg);		// odczyt rejestr przerwan w segmencie
-  int tsize = sizeof(exp_seg_int_chip_)/sizeof(*exp_seg_int_chip_) 
+  int tsize = EXP_LENGTH;
   expint = ~expint;					
   
   byte mask = 10000000;
