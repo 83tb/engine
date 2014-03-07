@@ -124,7 +124,7 @@ int i2cseg_find(){
   byte intseg = sio_raw(I2CSWITCH_ADDR)
   byte mask = 00010000;
   int success_code = 0;
-  int tsize = sizeof(i2cseg_index)/sizeof(*i2cseg_index)
+  int tsize = sizeof(i2cseg_)/sizeof(*i2cseg_)
   
   
   i2cseg_index = 0; // zaczynamy od zera
@@ -157,7 +157,8 @@ int chip_find(){
   byte exp_int_chip = exp_seg_int_chip_[i2cseg_index];
   byte exp_int_reg = exp_seg_int_reg_[i2cseg_index];
   sirr(i2cswitch, i2cseg);			// otwarcie segmentu magistrali
-  byte expint = sio(exp_int_chip, exp_int_reg);		// odczyt rejestr przerwan w segmencie 
+  byte expint = sio(exp_int_chip, exp_int_reg);		// odczyt rejestr przerwan w segmencie
+  int tsize = sizeof(expint_index)/sizeof(*expint_index) 
   expint = ~expint;					
   
   byte mask = 10000000;
@@ -165,7 +166,7 @@ int chip_find(){
   
   if (expint){
 
-  	for (expint_index,expint_index<size,expint_index++) {
+  	for (expint_index,expint_index<tsize,expint_index++) {
   
   		if (expint & mask){
     		Serial.print("interrupt from expander 0: ");
