@@ -158,7 +158,7 @@ int chip_find(){
   byte exp_int_reg = exp_seg_int_reg_[i2cseg_index];
   sirr(i2cswitch, i2cseg);			// otwarcie segmentu magistrali
   byte expint = sio(exp_int_chip, exp_int_reg);		// odczyt rejestr przerwan w segmencie
-  int tsize = sizeof(expint_index)/sizeof(*expint_index) 
+  int tsize = sizeof(exp_seg_int_chip_)/sizeof(*exp_seg_int_chip_) 
   expint = ~expint;					
   
   byte mask = 10000000;
