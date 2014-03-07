@@ -11,10 +11,10 @@ SerialCommand sCmd;
 
 
 
-  #define I2CSEG0 00000001
-  #define I2CSEG1 00000010
-  #define I2CSEG2 00000100		// nc
-  #define I2CSEG3 00001000		// nc
+  #define I2CSEG0 B00000001
+  #define I2CSEG1 B00000010
+  #define I2CSEG2 B00000100		// nc
+  #define I2CSEG3 B00001000		// nc
 
   #define I2CSWITCH_ADDR 0x68
   
@@ -113,7 +113,7 @@ SerialCommand sCmd;
 
 int i2cseg_find(){
   byte intseg = sio_raw(I2CSWITCH_ADDR);
-  byte mask = 00010000;
+  byte mask = B00010000;
   int success_code = 0;
   int tsize = sizeof(i2cseg_)/sizeof(*i2cseg_);
   
@@ -152,15 +152,16 @@ int button_find() {
   expander_regf = exp_intf_register_[i2cseg_index][expint_index];
   expander_regd = exp_intcap_register_[i2cseg_index][expint_index];
   byte button = sio(expander_addr, expander_regd);
-  
+  success_code = 1;
   button_index = 0;
   
   
   if (int_flag){		
-	  for (byte mask = 00000001;mask;mask <<=1) 
+	  for (byte mask = BB00000001;mask;mask <<=1) 
 	  {
 	    
 	    ++button_index;
+	
 	  }
 	  
   }
@@ -178,7 +179,7 @@ int chip_find() {
   int tsize = EXP_LENGTH;
   expint = ~expint;					
   
-  byte mask = 10000000;
+  byte mask = B10000000;
   expint_index = 0;
   
   if (expint){
@@ -825,7 +826,7 @@ void parse(byte data)
       sirr(0x68, reverse(mask));
       unsigned int value = sio(0x20,0x11);;
       Serial.println(value, HEX);
-
+	  
       ledon(value);
       
       
