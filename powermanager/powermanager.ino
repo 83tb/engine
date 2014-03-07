@@ -152,7 +152,7 @@ int button_find() {
   expander_regf = exp_intf_register_[i2cseg_index][expint_index];
   expander_regd = exp_intcap_register_[i2cseg_index][expint_index];
   byte button = sio(expander_addr, expander_regd);
-  success_code = 1;
+  
   button_index = 0;
   
   
@@ -161,9 +161,9 @@ int button_find() {
 	  {
 	    
 	    ++button_index;
-	
+	    
 	  }
-	  
+	  success_code = 1;
   }
   
   return success_code;
