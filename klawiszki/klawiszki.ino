@@ -76,21 +76,18 @@
   int expint_index;						// index wiazacy przerwania z expanderami w segmenie magistrali
   int button_index;						// index (finalnie numer) klawisza, ktory wywolal przerwanie
   
-  byte exp_interrupt_src_[][]   = {
+  byte exp_interrupt_src_[2][7]   = {
                       {EXP_SEG0_CHIP0_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP3_ADDR, EXP_SEG0_CHIP3_ADDR},
-				   {EXP_SEG1_CHIP0_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP3_ADDR, EXP_SEG1_CHIP3_ADDR
-				   }
-				  }
-  byte exp_intcap_register_[][] = {{EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB
-				   }
-				   {EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB
-				   }
-				  }
-  byte exp_intf_register_[][]   = {{EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
+				   {EXP_SEG1_CHIP0_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP3_ADDR, EXP_SEG1_CHIP3_ADDR},
+				  };
+  byte exp_intcap_register_[2][7] = {{EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
+				   {EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
+				  };
+  byte exp_intf_register_[2][7]   = {{EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
 				   },
 				   {EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
 				   }
-				  }
+				  };
 
   byte expander_addr;		// i2c adres expandera, zrodla przerwania
   byte expander_regf;		// interrupt flag register
@@ -111,8 +108,8 @@
 	
 	if (i2cseg_find()) {
 		if (chip_find()) {
-			if button_find() {
-				System.println("Huge success");
+			if (button_find()) {
+				Serial.println("Huge success");
 			}
 		}
 	}
@@ -129,7 +126,6 @@ int i2cseg_find(){
   int success_code = 0;
   int size = sizeof(i2cseg_index)/sizeof(*i2cseg_index)
   
-  // petla powinna miec ograniczenie na wielkosc tablicy - 1
   
   i2cseg_index = 0; // zaczynamy od zera
   
