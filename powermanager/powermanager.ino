@@ -58,8 +58,8 @@ SerialCommand sCmd;
   #define EXP_REG_GPIOB     0x13
   #define EXP_REG_OLATA     0x14
   #define EXP_REG_OLATB     0x15
-  #define EXP_LENGTH		7
-
+  #define EXP_TAB_LENGTH	7
+  #define SEG_TAB_LENGTH	2
 
   
   
@@ -82,90 +82,68 @@ SerialCommand sCmd;
   int button_index;						// index (finalnie numer) klawisza, ktory wywolal przerwanie
   
   
-  byte exp_interrupt_src_[2][7]   = {
-                      {EXP_SEG0_CHIP0_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP3_ADDR, EXP_SEG0_CHIP3_ADDR},
-				   {EXP_SEG1_CHIP0_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP3_ADDR, EXP_SEG1_CHIP3_ADDR},
-				  };
-  byte exp_intcap_register_[2][7] = {{EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
-				   {EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
-				  };
-  byte exp_intf_register_[2][7]   = {{EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
-				   },
-				   {EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
-				   }
-				  };
+  byte exp_interrupt_src_[SEG_TAB_LENGTH][EXP_TAB_LENGTH]   = {
+				     {EXP_SEG0_CHIP0_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP3_ADDR, EXP_SEG0_CHIP3_ADDR},
+				     {EXP_SEG1_CHIP0_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP3_ADDR, EXP_SEG1_CHIP3_ADDR},
+				    };
+  byte exp_intcap_register_[SEG_TAB_LENGTH][EXP_TAB_LENGTH] = {
+				     {EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
+				     {EXP_REG_INTCAPA, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB, EXP_REG_INTCAPA, EXP_REG_INTCAPB},
+				    };
+  byte exp_intf_register_[SEG_TAB_LENGTH][EXP_TAB_LENGTH]   = {
+				     {EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
+				     },
+				     {EXP_REG_INTFA, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB, EXP_REG_INTFA, EXP_REG_INTFB
+				     }
+				    };
 
   byte expander_addr;		// i2c adres expandera, zrodla przerwania
   byte expander_regf;		// interrupt flag register
   byte expander_regd;		// interrupt capture register
 
 
-
-
-
-
-  
-	
-	
-
-
-
-
 int i2cseg_find(){
   byte intseg = sio_raw(I2CSWITCH_ADDR);
   byte mask = B00010000;
   int success_code = 0;
-  int tsize = sizeof(i2cseg_)/sizeof(*i2cseg_);
-  
-  
+  int tsize = SEG_TAB_LENGTH;
   i2cseg_index = 0; // zaczynamy od zera
   
   for (i2cseg_index;i2cseg_index<tsize;i2cseg_index++) 
   {
 	  if (intseg & mask){
+		  i2cseg = i2cseg_[i2cseg_index];
 		  success_code = 1;
-	  
-    	  Serial.print("segment 0: ");
-    	  Serial.println(intseg, BIN);
-    	  i2cseg = i2cseg_[i2cseg_index];	//  i2cseg = I2CSEG0;
-    	  success_code = 1;
-		  
 		  break;
-	  
 	  }
-	  
-  	  mask <<=1;
-	  
-	  
+	  mask <<=1;
   }
-  
   return success_code;
-  
- 
 }
 
 
 int button_find() {
-  byte int_flag = sio(expander_addr, expander_regf);
-  int success_code = 0;
   expander_addr = exp_interrupt_src_[i2cseg_index][expint_index];
   expander_regf = exp_intf_register_[i2cseg_index][expint_index];
   expander_regd = exp_intcap_register_[i2cseg_index][expint_index];
-  byte button = sio(expander_addr, expander_regd);
+  byte int_flag = sio(expander_addr, expander_regf);
+  byte button   = sio(expander_addr, expander_regd);
+  button        = ~button;
+  button_index  = 0;
+  int success_code = 0;
   
-  button_index = 0;
   
   
   if (int_flag){		
-	  for (byte mask = BB00000001;mask;mask <<=1) 
+	  for (byte mask = B00000001;mask;mask <<=1) 
 	  {
-	    
+	    if (button & mask){
+	      success_code = 1;
+	      break;
+	    }
 	    ++button_index;
-	    
 	  }
-	  success_code = 1;
   }
-  
   return success_code;
 }  
 
@@ -176,36 +154,23 @@ int chip_find() {
   byte exp_int_reg = exp_seg_int_reg_[i2cseg_index];
   sirr(I2CSWITCH_ADDR,i2cseg);			// otwarcie segmentu magistrali
   byte expint = sio(exp_int_chip, exp_int_reg);		// odczyt rejestr przerwan w segmencie
-  int tsize = EXP_LENGTH;
+  int tsize = EXP_TAB_LENGTH;
+
   expint = ~expint;					
   
   byte mask = B10000000;
   expint_index = 0;
   
   if (expint){
-
-  	for (expint_index;expint_index<tsize;expint_index++) {
-  
-  		if (expint & mask){
-    		Serial.print("interrupt from expander 0: ");
-    		Serial.println(expint, BIN);
-			
-    		success_code = 1;		
-	
+	for (expint_index;expint_index<tsize;++expint_index) {
+		if (expint & mask){
+		success_code = 1;
+		break;
 		}
-		
-  
-  	  mask >>=1;			
-
-  
-      }
-  
- 
-
-}
-
+	  mask >>=1;
+	}
+  }
  return success_code;
- 
 }
 
 
@@ -266,7 +231,17 @@ void loop() {
   		if (i2cseg_find()) {
   		if (chip_find()) {
   			if (button_find()) {
-  				Serial.println("Huge success");
+  				Serial.println();
+				Serial.println("Huge success !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				Serial.println();
+				Serial.println();
+				Serial.print("i2cseg_index: ");
+				Serial.println(i2cseg_index);
+				Serial.print("expint_index: ");
+				Serial.println(expint_index);
+				Serial.print("button_index: ");
+				Serial.println(button_index);
+				Serial.println("=====================");
   			}
   		}
   	}
@@ -835,8 +810,3 @@ void parse(byte data)
     delay(1); //delay
   }
 }
-
-
-
-
-
