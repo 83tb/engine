@@ -101,6 +101,52 @@ SerialCommand sCmd;
   byte expander_regf;		// interrupt flag register
   byte expander_regd;		// interrupt capture register
 
+  
+  
+  byte exp_seg0_chips_input_[] = {EXP_SEG0_CHIP0_ADDR, EXP_SEG0_CHIP1_ADDR, EXP_SEG0_CHIP2_ADDR, EXP_SEG0_CHIP3_ADDR};
+  byte exp_seg1_chips_input_[] = {EXP_SEG1_CHIP0_ADDR, EXP_SEG1_CHIP1_ADDR, EXP_SEG1_CHIP2_ADDR, EXP_SEG1_CHIP3_ADDR, EXP_SEG1_CHIP4_ADDR, EXP_SEG1_CHIP5_ADDR};
+  byte exp_seg1_chips_output_[] = {EXP_SEG1_CHIP4_ADDR, EXP_SEG1_CHIP5_ADDR};
+  
+  int exp_seg0_chips_input_size = sizeof(exp_seg0_chips_input_)/sizeof(byte);
+  int exp_seg1_chips_input_size = sizeof(exp_seg1_chips_input_)/sizeof(byte);
+  int exp_seg1_chips_output_size = sizeof(exp_seg1_chips_output_)/sizeof(byte);
+  
+  
+void setup_all() {
+  
+  sirr(I2CSWITCH_ADDR, I2CSEG0);
+
+  
+  for(int i = 0; i <  exp_seg0_chips_input_size; i++) {
+      setup_input(i);
+	  setPullUp(i);
+	  setInterruptEnable(i);
+	  setDefaultValue(i);
+	  setSeqopDisabled(i);
+	  resetInterrupts(i);
+  }
+  
+ 
+  
+  sirr(I2CSWITCH_ADDR, I2CSEG1);
+  
+   for(int i = 0; i < exp_seg1_chips_input_size; i++) { 
+      setup_input(i);
+	  setPullUp(i);
+	  setInterruptEnable(i);
+	  setDefaultValue(i);
+	  setSeqopDisabled(i);
+	  resetInterrupts(i);
+  }
+  
+
+  
+  for(int i = 0; i < exp_seg1_chips_output_size; i++) { 
+      setup_output(i);
+  }
+  
+  }
+
 
 int i2cseg_find(){
   byte intseg = sio_raw(I2CSWITCH_ADDR);
@@ -183,13 +229,8 @@ void setup() {
   pinMode(2, INPUT);
   pinMode(13, OUTPUT);
   
-  setup_input(0x20);
-  setup_output(0x21);
-  setPullUp(0x20);
-  setInterruptEnable(0x20);
-  setDefaultValue(0x20);
-  setSeqopDisabled(0x20);
-  resetInterrupts(0x20);
+  setup_all();
+  
 
   sCmd.setDefaultHandler(unrecognized);      
   sCmd.addCommand("#", comment);
