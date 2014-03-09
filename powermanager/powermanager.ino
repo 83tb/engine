@@ -131,13 +131,13 @@ byte expander_regd;		// interrupt capture register
 
 
 
-void setup_all() {
+void setupAll() {
 	/* setting up all the devices found in the tables */
 
 	sirr(I2CSWITCH_ADDR, I2CSEG0);
 
 	for(int i = 0; i <  exp_seg0_chips_input_size; i++) {
-		setup_input(i);
+		setupInput(i);
 		setPullUp(i);
   	 	setInterruptEnable(i);
 		setDefaultValue(i);
@@ -148,7 +148,7 @@ void setup_all() {
 	sirr(I2CSWITCH_ADDR, I2CSEG1);
 
 	for(int i = 0; i < exp_seg1_chips_input_size; i++) { 
-		setup_input(i);
+		setupInput(i);
 		setPullUp(i);
 		setInterruptEnable(i);
 		setDefaultValue(i);
@@ -157,13 +157,13 @@ void setup_all() {
 	}
 
 	for(int i = 0; i < exp_seg1_chips_output_size; i++) { 
-  	  	setup_output(i);
+  	  	setupOutput(i);
 	}
 
 }
 
 
-int i2cseg_find(){
+int i2csegFind(){
 	byte intseg = sio_raw(I2CSWITCH_ADDR);
 	byte mask = B00010000;
 	int success_code = 0;
@@ -187,7 +187,7 @@ int i2cseg_find(){
 
 
 
-int chip_find() {
+int chipFind() {
 	int success_code = 0;
 	byte exp_int_chip = exp_seg_int_chip_[i2cseg_index];
 	byte exp_int_reg = exp_seg_int_reg_[i2cseg_index];
@@ -215,7 +215,7 @@ int chip_find() {
 
 
 
-int button_find() {
+int buttonFind() {
 	expander_addr = exp_interrupt_src_[i2cseg_index][expint_index];
 	expander_regf = exp_intf_register_[i2cseg_index][expint_index];
 	expander_regd = exp_intcap_register_[i2cseg_index][expint_index];
@@ -246,7 +246,7 @@ void addConsole() {
 	sCmd.addCommand("#", comment);
 
 	sCmd.addCommand("h", help);  
-	sCmd.addCommand("i2c", i2c_scan); 
+	sCmd.addCommand("i2c", i2cScan); 
 	sCmd.addCommand("sir", sir_func);
 	sCmd.addCommand("sio", sio_func);
 	sCmd.addCommand("sior", sior_func);
@@ -269,7 +269,7 @@ void setup() {
 	pinMode(2, INPUT);
 	pinMode(13, OUTPUT);
 
-	setup_all();
+	setupAll();
 	addConsole();
 
 }
@@ -284,9 +284,9 @@ void loop() {
 	if (a==0) {
   	//testInterrupt();
 	
-		if (i2cseg_find()) {
-			if (chip_find()) {
-				if (button_find()) {
+		if (i2csegFind()) {
+			if (chipFind()) {
+				if (buttonFind()) {
 					Serial.println();
 					Serial.println("Huge success !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 					Serial.println();
@@ -316,7 +316,7 @@ void loop() {
 
 // ADDITIONAL FUNCTIONS
 
-void i2c_scan() {
+void i2cScan() {
 	byte error, address;
 	int nDevices;
 
@@ -617,7 +617,7 @@ int sio_raw(int address) {
 
 // MCP231017 SPECIFIC SETUP
 
-void setup_output(char ad)
+void setupOutput(char ad)
 {
 
 	sir(ad,0x00,0x00);
@@ -627,7 +627,7 @@ void setup_output(char ad)
 
 
 
-void setup_input(char ad)
+void setupInput(char ad)
 {
 
 	sir(ad,0x00,0xff);
