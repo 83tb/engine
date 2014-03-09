@@ -310,75 +310,7 @@ void loop() {
 
 
 
-void setup_output(char ad)
-{
 
-	sir(ad,0x00,0x00);
-	sir(ad,0x01,0x00);
-
-}
-
-
-
-void setup_input(char ad)
-{
-
-	sir(ad,0x00,0xff);
-	sir(ad,0x01,0xff);
-	sir(ad,0x02,0x00);
-	sir(ad,0x03,0x00);
-
-}
-
-
-
-
-
-
-void setPullUp(int ad)
-{
-	sir(ad,0x0c,0xff);
-	sir(ad,0x0d,0xff);
-
-}
-
-
-// set interrupt enable
-void setInterruptEnable(int ad)
-{
-	sir(ad,0x04,0xff);
-	sir(ad,0x05,0xff);
-
-}
-
-
-void setDefaultValue(int ad)
-{
-	sir(ad,0x06,0xff);
-	sir(ad,0x07,0xff);
-
-
-	// set interrupt on change
-	sir(ad,0x08,0xff); 
-	sir(ad,0x09,0xff);
-
-
-}
-
-void setSeqopDisabled(int ad)
-{
-	sir(ad,0x0a,0x20);
-
-}
-
-
-void resetInterrupts(int ad)
-{
-	sio(ad,0x10);
-	sio(ad,0x11);
-
-
-}
 
 
 
@@ -680,4 +612,78 @@ int sio_raw(int address) {
 	return c;
 }
 
+
+
+
+// MCP231017 SPECIFIC SETUP
+
+void setup_output(char ad)
+{
+
+	sir(ad,0x00,0x00);
+	sir(ad,0x01,0x00);
+
+}
+
+
+
+void setup_input(char ad)
+{
+
+	sir(ad,0x00,0xff);
+	sir(ad,0x01,0xff);
+	sir(ad,0x02,0x00);
+	sir(ad,0x03,0x00);
+
+}
+
+
+
+
+
+
+void setPullUp(int ad)
+{
+	sir(ad,0x0c,0xff);
+	sir(ad,0x0d,0xff);
+
+}
+
+
+// set interrupt enable
+void setInterruptEnable(int ad)
+{
+	sir(ad,0x04,0xff);
+	sir(ad,0x05,0xff);
+
+}
+
+
+void setDefaultValue(int ad)
+{
+	sir(ad,0x06,0xff);
+	sir(ad,0x07,0xff);
+
+
+	// set interrupt on change
+	sir(ad,0x08,0xff); 
+	sir(ad,0x09,0xff);
+
+
+}
+
+void setSeqopDisabled(int ad)
+{
+	sir(ad,0x0a,0x20);
+
+}
+
+
+void resetInterrupts(int ad)
+{
+	sio(ad,0x10);
+	sio(ad,0x11);
+
+
+}
 
