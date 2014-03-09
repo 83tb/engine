@@ -2,12 +2,13 @@
 // 2013
 
 
+// GENERAL SETTINGS
+
 #define I2C_DELAY 0
 
-#include <Wire.h>
-#include <SerialCommand.h>
 
-SerialCommand sCmd; 
+
+// ------------------------------- CONFIGURATION
 
 #define I2CSEG0 B00000001
 #define I2CSEG1 B00000010
@@ -60,7 +61,7 @@ SerialCommand sCmd;
 #define SEG_TAB_LENGTH	2
 
 
-// ------------------------------- CONFIGURATION
+
 
 byte exp_seg_int_chip_[] = {EXP_SEG0_CHIP0_ADDR, EXP_SEG1_CHIP0_ADDR};	
 byte exp_seg_int_reg_[]  = {EXP_REG_GPIOB, EXP_REG_GPIOB};	
@@ -106,9 +107,19 @@ byte exp_seg1_chips_output_[] = {EXP_SEG1_CHIP4_ADDR, EXP_SEG1_CHIP5_ADDR};
 //  ------------------------------- END OF CONFIGURATION
 
 
+// EVALUATED
+
 int exp_seg0_chips_input_size = sizeof(exp_seg0_chips_input_)/sizeof(byte);
 int exp_seg1_chips_input_size = sizeof(exp_seg1_chips_input_)/sizeof(byte);
 int exp_seg1_chips_output_size = sizeof(exp_seg1_chips_output_)/sizeof(byte);
+
+
+// Initialization and library loading
+
+#include <Wire.h>
+#include <SerialCommand.h>
+
+SerialCommand sCmd; 
 
 byte i2cseg;							// "adres" obslugiwanego segmentu magistrali
 int i2cseg_index;						// index do tablicy adresowej segmentow magistrali
@@ -119,7 +130,9 @@ byte expander_regf;		// interrupt flag register
 byte expander_regd;		// interrupt capture register
 
 
+
 void setup_all() {
+	/* setting up all the devices found in the tables */
 
 	sirr(I2CSWITCH_ADDR, I2CSEG0);
 
