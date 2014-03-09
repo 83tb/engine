@@ -238,7 +238,7 @@ void addConsole() {
 	sCmd.addCommand("sio", sio_func);
 	sCmd.addCommand("sior", sior_func);
 	sCmd.addCommand("sirr", sirr_func);
-	sCmd.addCommand("read", i2c_read);
+
 
 	Serial.println("---------------------------------------------------------\n"); 
 	Serial.println("POWERMANAGER, @83TB\n"); 
@@ -296,118 +296,44 @@ void loop() {
 }
 
 
-void help(){
-
-Serial.println("");
-
-Serial.println("Hint: h: prints help");
-Serial.println("Hint: i2c: i2c scanner");
-Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
-Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
-Serial.println("Hint: rb: read button");
-Serial.println("Hint: read: read i2c");
-Serial.println("Hint: # : comment");
-Serial.println("\n");
-
-}
 
 
-
-void i2c_scan() {
-byte error, address;
-int nDevices;
-
-
-
-nDevices = 0;
-for(address = 1; address < 127; address++ ) 
-{
-Wire.beginTransmission(address);
-error = Wire.endTransmission();
-
-if (error == 0)
-{
-  Serial.print("Info: I2C device found at address 0x");
-  if (address<16) 
-    Serial.print("0");
-  Serial.println(address,HEX);
-    
-
-  nDevices++;
-}
-else if (error==4) 
-{
-  Serial.print("Info: Unknown error at address 0x");
-  if (address<16) 
-    Serial.print("0");
-  Serial.println(address,HEX);
-}    
-}
-
-if (nDevices == 0)
-Serial.println("Info: No I2C devices found\n");
-else
-Serial.println("Log: Completed\n");
-
-
-
-}
-
-
-
-
-
-void comment() {
-
-
-}
-
-
-// nie rozpoznano komendy
-void unrecognized(const char *command) {
-Serial.println("What? I don't know this command. ");
-}
 
 
 void sir_func() {
 
-
-int address;
-int registry;
-int packet;
-char *arg;
-
-
-arg = sCmd.next();
-if (arg != NULL) {
-  address = strtol(arg, NULL, 16);
-
-}
-else {
-  Serial.println("No arguments");
-}
-
-arg = sCmd.next();
-if (arg != NULL) {
-  registry = strtol(arg, NULL, 16);
+	int address;
+	int registry;
+	int packet;
+	char *arg;
 
 
-}
-else {
-  Serial.println("No second argument");
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+		address = strtol(arg, NULL, 16);
+	}
+	else {
+  	  Serial.println("No arguments");
+	}
+
+	arg = sCmd.next();
+	if (arg != NULL) {
+  	 	registry = strtol(arg, NULL, 16);
+	}
+	else {
+  	 	Serial.println("No second argument");
+	}
 
 
-arg = sCmd.next();
-if (arg != NULL) {
-  packet = strtol(arg, NULL, 16);
+	arg = sCmd.next();
+	if (arg != NULL) {
+		packet = strtol(arg, NULL, 16);
+	}
+	else {
+		Serial.println("No third argument");
+	}
 
-}
-else {
-Serial.println("No third argument");
-}
-
-sir(address,registry,packet);
+	sir(address,registry,packet);
 
 }
 
@@ -416,33 +342,32 @@ sir(address,registry,packet);
 
 void sir(int address,int registry,int packet) {
 
-Serial.println("---------------------------------------------------------");
+	Serial.println("---------------------------------------------------------");
 
-Wire.beginTransmission(address);
-Serial.print("Adres urzadzenia: 0x");
-Serial.print(address, HEX);
-Serial.print("    Adres rejestru: 0x");
-Serial.println(registry, HEX);
+	Wire.beginTransmission(address);
+	Serial.print("Adres urzadzenia: 0x");
+	Serial.print(address, HEX);
+	Serial.print("    Adres rejestru: 0x");
+	Serial.println(registry, HEX);
 
-Wire.write(registry); 
+	Wire.write(registry); 
 
-Serial.print("Wysylamy pakiet: 0x");
-Serial.println(packet, HEX);
-Wire.write(packet);    
+	Serial.print("Wysylamy pakiet: 0x");
+	Serial.println(packet, HEX);
+	Wire.write(packet);    
 
-Serial.print("Odczytano:   ");
-Wire.endTransmission(); 
-Wire.requestFrom(address, 1); 
+	Serial.print("Odczytano:   ");
+	Wire.endTransmission(); 
+	Wire.requestFrom(address, 1); 
 
-while(Wire.available())    // slave may send less than requested
-{ 
-byte c = Wire.read(); // receive a byte as character
-Serial.print(c, BIN);
-Serial.print(" | 0x");
-Serial.println(c, HEX);
-
-}
-delay(I2C_DELAY);
+	while(Wire.available()) {
+		 
+		byte c = Wire.read(); // receive a byte as character
+		Serial.print(c, BIN);
+		Serial.print(" | 0x");
+		Serial.println(c, HEX);
+	}
+	delay(I2C_DELAY);
  
 
 }
@@ -454,62 +379,58 @@ delay(I2C_DELAY);
 
 void sirr(int address,int packet) {
 
-Serial.println("---------------------------------------------------------");
+	Serial.println("---------------------------------------------------------");
 
-Wire.beginTransmission(address);
-Serial.print("Adres urzadzenia: 0x");
-Serial.print(address, HEX);
+	Wire.beginTransmission(address);
+	Serial.print("Adres urzadzenia: 0x");
+	Serial.print(address, HEX);
 
 
-Serial.print("Wysylamy pakiet: 0x");
-Serial.println(packet, HEX);
-Wire.write(packet);    
+	Serial.print("Wysylamy pakiet: 0x");
+	Serial.println(packet, HEX);
+	Wire.write(packet);    
 
-Serial.print("Odczytano:   ");
-Wire.endTransmission(); 
-Wire.requestFrom(address, 1); 
+	Serial.print("Odczytano:   ");
+	Wire.endTransmission(); 
+	Wire.requestFrom(address, 1); 
 
-while(Wire.available())    // slave may send less than requested
-{ 
-byte c = Wire.read(); // receive a byte as character
-Serial.print(c, BIN);
-Serial.print(" | 0x");
-Serial.println(c, HEX);
+	while(Wire.available()) { 
+		byte c = Wire.read(); // receive a byte as character
+		Serial.print(c, BIN);
+		Serial.print(" | 0x");
+		Serial.println(c, HEX);
 
-}
-delay(I2C_DELAY);
- 
+	}
+	delay(I2C_DELAY);
 
 }
 
 
 int sio(int address,int registry) {
-byte c;
-Serial.println("---------------------------------------------------------");
-Wire.beginTransmission(address);
-Serial.print("Adres urzadzenia: 0x");
-Serial.print(address, HEX);
-Serial.print("   Adres rejestru: 0x");
-Serial.println(registry, HEX);
+	byte c;
+	Serial.println("---------------------------------------------------------");
+	Wire.beginTransmission(address);
+	Serial.print("Adres urzadzenia: 0x");
+	Serial.print(address, HEX);
+	Serial.print("   Adres rejestru: 0x");
+	Serial.println(registry, HEX);
 
-Wire.write(registry); 
+	Wire.write(registry); 
 
 
-Serial.print("Odczytano:     ");
-Wire.endTransmission();  
-Wire.requestFrom(address, 1); 
+	Serial.print("Odczytano:     ");
+	Wire.endTransmission();  
+	Wire.requestFrom(address, 1); 
 
-while(Wire.available())  
-{ 
-c = Wire.read(); 
-Serial.print(c, BIN);
-Serial.print(" | 0x");
-Serial.println(c, HEX);
-
- 
+	while(Wire.available()) { 
+		c = Wire.read(); 
+		Serial.print(c, BIN);
+		Serial.print(" | 0x");
+		Serial.println(c, HEX);
 }
-delay(I2C_DELAY);
-return c;
+
+	delay(I2C_DELAY);
+	return c;
 
 }
 
@@ -517,70 +438,17 @@ return c;
 
 
 int sio_raw(int address) {
-byte c;
+	byte c;
 
 
-Wire.requestFrom(address, 1); 
+	Wire.requestFrom(address, 1); 
 
-while(Wire.available())  
-{ 
-c = Wire.read(); 
+	while(Wire.available()) { 
+		c = Wire.read(); 
+	}
 
-
-
- 
-}
-
-Serial.println(c, HEX);
-return c;
-}
-
-
-
-void ledon(int value) {
-
-// state = ~state;
-
-sir(0x21,0x12,value);
-sir(0x21,0x13,0x00);
-
-}
-
-void i2c_read() {
-
-int address;
-char *arg;
-
-arg = sCmd.next();
-if (arg != NULL) {
-
-    address = strtol(arg, NULL, 16);
-    Wire.requestFrom(address, 1); 
-
-    while(Wire.available())  
-   { 
-     char c = Wire.read(); 
-     Serial.print(c, BIN);
- 	Serial.print(" | 0x");
-     Serial.println(c, HEX);
-
- 
-   }
-   delay(I2C_DELAY);
-	
-	
-    
-  }
-  
-
-
-else {
-    Serial.println("Add address of the device, like 0x20");
-}
-
-
-
-
+	Serial.println(c, HEX);
+	return c;
 }
 
 
@@ -588,31 +456,31 @@ else {
 void sio_func() {
 
 
-int address;
-int registry;
-int packet;
-char *arg;
+	int address;
+	int registry;
+	int packet;
+	char *arg;
 
 
-arg = sCmd.next();
-if (arg != NULL) {
-  address = strtol(arg, NULL, 16);   
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+		address = strtol(arg, NULL, 16);   
+	}
 
-else {
-  Serial.println("No arguments");
-}
+	else {
+  	  
+		Serial.println("No arguments");
+	}
 
-arg = sCmd.next();
-if (arg != NULL) {
-  registry = strtol(arg, NULL, 16);
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+  	 	registry = strtol(arg, NULL, 16);
+	} 
+	else {
+  	  	Serial.println("No second argument");
+	}
 
-else {
-  Serial.println("No second argument");
-}
-
-sio(address,registry);
+	sio(address,registry);
 
 }
 
@@ -622,55 +490,50 @@ sio(address,registry);
 void sirr_func() {
 
 
-int address;
-int registry;
-int packet;
-char *arg;
+	int address;
+	int registry;
+	int packet;
+	char *arg;
 
 
-arg = sCmd.next();
-if (arg != NULL) {
-  address = strtol(arg, NULL, 16);   
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+		address = strtol(arg, NULL, 16);   
+	}
+	else {
+		Serial.println("No arguments");
+	}
 
-else {
-  Serial.println("No arguments");
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+		registry = strtol(arg, NULL, 16);
+	}
 
-arg = sCmd.next();
-if (arg != NULL) {
-  registry = strtol(arg, NULL, 16);
-}
+	else {
+		Serial.println("No second argument");
+	}
 
-else {
-  Serial.println("No second argument");
-}
-
-sirr(address,registry);
+	sirr(address,registry);
 
 }  
 
 void sior_func() {
 
 
-int address;
-int registry;
-int packet;
-char *arg;
+	int address;
+	int registry;
+	int packet;
+	char *arg;
 
 
-arg = sCmd.next();
-if (arg != NULL) {
-  address = strtol(arg, NULL, 16);   
-}
+	arg = sCmd.next();
+	if (arg != NULL) {
+		address = strtol(arg, NULL, 16);   
+	}
 
-
-
-
-
-else {
-  Serial.println("No arguments");
-}
+	else {
+		Serial.println("No arguments");
+	}
 
 	sio_raw(address);
 
@@ -752,6 +615,65 @@ void resetInterrupts(int ad)
 }
 
 
+
+// ADDITIONAL FUNCTIONS
+
+void i2c_scan() {
+	byte error, address;
+	int nDevices;
+
+
+
+	nDevices = 0;
+	for(address = 1; address < 127; address++ ) {
+		Wire.beginTransmission(address);
+		error = Wire.endTransmission();
+
+		if (error == 0) {
+			Serial.print("Info: I2C device found at address 0x");
+  		  	if (address<16) Serial.print("0");
+  		  	Serial.println(address,HEX);
+    
+
+  		  	nDevices++;
+		}
+		else if (error==4) 
+		{
+  			Serial.print("Info: Unknown error at address 0x");
+  		if (address<16) Serial.print("0");
+			Serial.println(address,HEX);
+		}    
+	}
+
+	if (nDevices == 0) Serial.println("Info: No I2C devices found\n");
+	else Serial.println("Log: Completed\n");
+
+}
+
+
+void comment() {}
+
+
+void help(){
+
+	Serial.println("");
+
+	Serial.println("Hint: h: prints help");
+	Serial.println("Hint: i2c: i2c scanner");
+	Serial.println("Hint: sir: talks to i2c, takes 3 arguments");
+	Serial.println("Hint: sio: fetch from i2c, takes 2 arguments");
+	Serial.println("Hint: rb: read button");
+	Serial.println("Hint: read: read i2c");
+	Serial.println("Hint: # : comment");
+	Serial.println("\n");
+
+}
+
+
+// nie rozpoznano komendy
+void unrecognized(const char *command) {
+	Serial.println("What? I don't know this command. ");
+}
 
 
 
