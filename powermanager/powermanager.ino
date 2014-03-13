@@ -14,7 +14,7 @@ SerialCommand sCmd;
 // GENERAL SETTINGS
 
 #define I2C_DELAY 0
-
+#define DEBUG false
 
 
 // ------------------------------- CONFIGURATION
@@ -444,6 +444,7 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
     actionid = pgm_read_byte(&actions_[button_action][0]);
     actindex = pgm_read_byte(&actions_[button_action][1]);
 
+	#if DEBUG
     Serial.println(F("==============================================================event_handle: "));
     Serial.print(F("---------button_action: "));
     Serial.print(button_action, HEX);
@@ -457,6 +458,8 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
     Serial.println(next_actionid, HEX);
     Serial.print(F("--------------: "));
     Serial.println();
+	#endif
+	
     int a = 0;
     while(actionid) {
         if (actionid == MULTIACTION) {
@@ -464,8 +467,11 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
             next_actindex =  pgm_read_byte(&multiaction_tab_[actindex][3]);
             actionid =  pgm_read_byte(&multiaction_tab_[actindex][0]);
             actindex = pgm_read_byte(&multiaction_tab_[actindex][1]);
+#if DEBUG
             Serial.print(F("******************                          -=-=-=-=  MULTIACTION =-=-=-=-"));
+#endif
         }
+#if DEBUG
         Serial.println(F("==============================================================inside loop while: "));
         Serial.print(F("actionid: "));
         Serial.println(actionid, HEX);
@@ -475,11 +481,13 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
         Serial.println(next_actionid, HEX);
         Serial.print(F("next_actindex: "));
         Serial.println(next_actindex, HEX);
+#endif
 //  Serial.println(F("NOW CALLING: latMCP23017: "));
-
+		
         if (actionid == MCP23017LAT_ON_A || actionid == MCP23017LAT_ON_B || actionid == MCP23017LAT_OFF_A || actionid == MCP23017LAT_OFF_B ) {
-
+#if DEBUG
             Serial.println(F("NOW CALLING: latMCP23017: "));
+#endif
             latMCP23017(actionid, actindex);
         }
         actionid = next_actionid;
@@ -498,23 +506,25 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
 
 
 void latMCP23017(byte actionid, byte actindex) {
+#if DEBUG
     Serial.println(F("==============================================================latMCP23017: "));
     Serial.print(F("actionid: "));
     Serial.println(actionid, HEX);
     Serial.print(F("actindex: "));
     Serial.println(actindex, HEX);
-
+#endif
     byte olatreg;
     byte i2cseg = pgm_read_byte(&latMCP23017_on_off_tab_[actindex][0]);
     byte expander_addr = pgm_read_byte(&latMCP23017_on_off_tab_[actindex][1]);
     byte reg_mask = pgm_read_byte(&latMCP23017_on_off_tab_[actindex][2]);
+#if DEBUG
     Serial.print(F("i2cseg: "));
     Serial.println(i2cseg, HEX);
     Serial.print(F("expander_addr: "));
     Serial.println(expander_addr, HEX);
     Serial.print(F("reg_mask: "));
     Serial.println(reg_mask, BIN);
-
+#endif
 
 
 
@@ -526,18 +536,26 @@ void latMCP23017(byte actionid, byte actindex) {
     }
     sirr(I2CSWITCH_ADDR,i2cseg);
     byte reg_value = sio(expander_addr, olatreg);
+#if DEBUG
     Serial.print(F("--------------reg_value: "));
     Serial.println(reg_value);
+#endif
     if (actionid == MCP23017LAT_OFF_A || actionid == MCP23017LAT_OFF_B) {
+#if DEBUG
         Serial.print(F("OFF OFF OFF: "));
+#endif
         reg_mask = ~reg_mask;
         reg_value = reg_value & reg_mask;
     } else {
+#if DEBUG
         Serial.print(F("ON ON ON:"));
+#endif
         reg_value = reg_value | reg_mask;
     }
+#if DEBUG
     Serial.print(F("--------------new reg_value: "));
     Serial.println(reg_value);
+#endif
 
     sir(expander_addr, olatreg, reg_value);
 }
@@ -555,11 +573,14 @@ void setupMCP23017() {
         for(int j = jbeg; j < jend; j++) {		// od pierwszego do ostatniego elementu w segmencie
             byte chip_addr = pgm_read_byte(&exp_MCP23017_chips_[j][0]);
             int cfg_index = pgm_read_byte(&exp_MCP23017_chips_[j][1]);
+#if DEBUG
 	    Serial.print(F("chip No:"));
 	    Serial.println(j, DEC);
+#endif
             for(int k = 0; k < MCP23017_CFG_REGS; k++) {
                 byte chip_reg = pgm_read_byte(&setup_MCP23017_reg_tab_[k]);
                 byte reg_value = pgm_read_byte(&setup_MCP23017_cfg_tab_[cfg_index][k]);
+#if DEBUG
 		Serial.print(F("=<> CFG: "));
 		Serial.print(F("chip: "));
 		Serial.print(chip_addr, HEX);
@@ -567,6 +588,7 @@ void setupMCP23017() {
 		Serial.print(chip_reg, HEX);
 		Serial.print(F(" value: "));
 		Serial.println(reg_value, BIN);
+#endif
 		sir(chip_addr, chip_reg, reg_value);
             }
         }
@@ -731,6 +753,7 @@ void loop() {
         if (i2csegFind()) {
             if (chipFind()) {
                 if (buttonFind()) {
+#if DEBUG
                     Serial.println();
                     Serial.println(F("Huge success !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
                     Serial.println();
@@ -743,11 +766,14 @@ void loop() {
                     Serial.println(button_index);
                     Serial.println(F("====================="));
                     success_read = 1;
+#endif
                 }
             }
         }
         if (success_read) {
+#if DEBUG
             Serial.println(F("teraz wykonanie: !!! :)  !!!"));
+#endif
             event_handle(i2cseg_index, expint_index, button_index);
         }
     }
@@ -954,30 +980,37 @@ void sior_func() {
 
 void sir(int address,int registry,int packet) {
 
+#if DEBUG
     Serial.println(F("---------------------------------------------------------"));
-
+#endif
     Wire.beginTransmission(address);
+#if DEBUG
     Serial.print(F("Adres urzadzenia: 0x"));
     Serial.print(address, HEX);
     Serial.print(F("    Adres rejestru: 0x"));
     Serial.println(registry, HEX);
+#endif
 
     Wire.write(registry);
-
+#if DEBUG
     Serial.print(F("Wysylamy pakiet: 0x"));
     Serial.println(packet, HEX);
+#endif
     Wire.write(packet);
-
+#if DEBUG
     Serial.print(F("Odczytano:   "));
+#endif
     Wire.endTransmission();
     Wire.requestFrom(address, 1);
 
     while(Wire.available()) {
 
         byte c = Wire.read(); // receive a byte as character
+		#if DEBUG
         Serial.print(c, BIN);
         Serial.print(" | 0x");
         Serial.println(c, HEX);
+		#endif
     }
     delay(I2C_DELAY);
 
@@ -989,26 +1022,32 @@ void sir(int address,int registry,int packet) {
 
 void sirr(int address,int packet) {
 
+#if DEBUG
     Serial.println(("---------------------------------------------------------"));
-
+#endif
     Wire.beginTransmission(address);
+#if DEBUG
     Serial.print(F("Adres urzadzenia: 0x"));
     Serial.print(address, HEX);
 
 
     Serial.print(F("Wysylamy pakiet: 0x"));
     Serial.println(packet, HEX);
+#endif
     Wire.write(packet);
-
+#if DEBUG
     Serial.print(F("Odczytano:   "));
+#endif
     Wire.endTransmission();
     Wire.requestFrom(address, 1);
 
     while(Wire.available()) {
         byte c = Wire.read(); // receive a byte as character
+#if DEBUG
         Serial.print(c, BIN);
         Serial.print(" | 0x");
         Serial.println(c, HEX);
+#endif
 
     }
     delay(I2C_DELAY);
@@ -1018,25 +1057,32 @@ void sirr(int address,int packet) {
 
 int sio(int address,int registry) {
     byte c;
+#if DEBUG
     Serial.println(F("---------------------------------------------------------"));
+#endif
     Wire.beginTransmission(address);
+#if DEBUG
     Serial.print(F("Adres urzadzenia: 0x"));
     Serial.print(address, HEX);
     Serial.print(F("   Adres rejestru: 0x"));
     Serial.println(registry, HEX);
+#endif
 
     Wire.write(registry);
 
-
+#if DEBUG
     Serial.print(F("Odczytano:     "));
+#endif
     Wire.endTransmission();
     Wire.requestFrom(address, 1);
 
     while(Wire.available()) {
         c = Wire.read();
+#if DEBUG
         Serial.print(c, BIN);
         Serial.print(" | 0x");
         Serial.println(c, HEX);
+#endif
     }
 
     delay(I2C_DELAY);
@@ -1056,8 +1102,9 @@ int sio_raw(int address) {
     while(Wire.available()) {
         c = Wire.read();
     }
-
+#if DEBUG
     Serial.println(c, HEX);
+#endif
     return c;
 }
 
@@ -1136,3 +1183,4 @@ void resetInterrupts(int ad)
 
 }
 */
+
