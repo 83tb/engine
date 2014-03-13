@@ -444,7 +444,7 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
     actionid = pgm_read_byte(&actions_[button_action][0]);
     actindex = pgm_read_byte(&actions_[button_action][1]);
 
-	#if DEBUG
+#if DEBUG
     Serial.println(F("==============================================================event_handle: "));
     Serial.print(F("---------button_action: "));
     Serial.print(button_action, HEX);
@@ -458,7 +458,7 @@ void event_handle(byte i2cseg_index, byte expint_index, byte button_index) {
     Serial.println(next_actionid, HEX);
     Serial.print(F("--------------: "));
     Serial.println();
-	#endif
+#endif
 	
     int a = 0;
     while(actionid) {
